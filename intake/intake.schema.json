@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://orchbiz.local/schemas/intake.schema.json",
+  "title": "OrchBiz Customer Intake Schema",
+  "description": "Canonical JSON structure parsed from the Customer Intake Google Form / Excel spreadsheet.",
+  "type": "object",
+  "required": [
+    "submission_date",
+    "client_slug",
+    "business_name",
+    "business_niche",
+    "business_summary",
+    "target_audience",
+    "primary_location",
+    "selected_package",
+    "website_modules",
+    "automation_modules",
+    "core_offerings",
+    "key_differentiators",
+    "brand_tone",
+    "primary_cta",
+    "enquiry_fields",
+    "notification_channels",
+    "notification_recipients",
+    "booking_calendar_type",
+    "business_hours",
+    "lead_storage_target",
+    "hosting_preference",
+    "setup_budget_limit",
+    "monthly_ops_budget",
+    "target_launch_date",
+    "ai_data_consent"
+  ],
+  "properties": {
+    "submission_date": { "type": "string", "description": "ISO date or timestamp of questionnaire submission" },
+    "client_slug": { "type": "string", "pattern": "^[a-z0-9-]+$", "description": "Kebab-case identifier for client workspace folder" },
+    "business_name": { "type": "string", "minLength": 2 },
+    "business_niche": { "type": "string" },
+    "tagline": { "type": "string" },
+    "business_summary": { "type": "string", "minLength": 20 },
+    "target_audience": { "type": "string", "minLength": 10 },
+    "primary_location": { "type": "string" },
+    "selected_package": {
+      "type": "string",
+      "enum": ["starter-lead-to-appointment", "custom"]
+    },
+    "website_modules": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "business-landing-page",
+          "services-and-pricing",
+          "enquiry-form",
+          "appointment-booking",
+          "faq-assistant",
+          "lead-dashboard",
+          "social-content-calendar"
+        ]
+      },
+      "minItems": 1
+    },
+    "automation_modules": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "capture-and-store-lead",
+          "notify-business-owner",
+          "classify-enquiry",
+          "draft-follow-up",
+          "schedule-appointment",
+          "send-approved-reminder",
+          "weekly-performance-report"
+        ]
+      },
+      "minItems": 1
+    },
+    "core_offerings": { "type": "string", "minLength": 10 },
+    "key_differentiators": { "type": "string" },
+    "verified_testimonials": { "type": "string" },
+    "top_faqs": { "type": "string" },
+    "brand_tone": { "type": "string" },
+    "primary_color": { "type": "string" },
+    "secondary_color": { "type": "string" },
+    "logo_and_assets_url": { "type": "string" },
+    "primary_cta": { "type": "string" },
+    "enquiry_fields": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 2
+    },
+    "notification_channels": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "notification_recipients": { "type": "string" },
+    "booking_calendar_type": {
+      "type": "string",
+      "enum": ["Google Calendar", "Calendly Link", "Built-in Slot Request", "Manual Follow-up Only"]
+    },
+    "business_hours": { "type": "string" },
+    "lead_storage_target": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "existing_domain": { "type": "string" },
+    "hosting_preference": {
+      "type": "string",
+      "enum": ["Client-Owned Cloud Account", "Operator-Managed Hosting", "Decide Later"]
+    },
+    "setup_budget_limit": { "type": "string" },
+    "monthly_ops_budget": { "type": "string" },
+    "target_launch_date": { "type": "string" },
+    "ai_data_consent": {
+      "type": "boolean",
+      "const": true,
+      "description": "Must be true before any AI processing is executed"
+    },
+    "operator_notes": { "type": "string" }
+  },
+  "additionalProperties": false
+}

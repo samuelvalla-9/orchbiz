@@ -1,0 +1,44 @@
+{
+  "packageId": "starter-lead-to-appointment",
+  "version": "1.0.0",
+  "name": "Lead-to-Appointment Starter System",
+  "targetNiche": "Coaching & Training Institutes (and Small Local Service Businesses)",
+  "description": "End-to-end lead capture, qualification, instant staff alert, follow-up drafting, appointment scheduling, and lead tracking dashboard.",
+  "includedWebsiteModules": [
+    "business-landing-page",
+    "services-and-pricing",
+    "enquiry-form",
+    "appointment-booking",
+    "lead-dashboard"
+  ],
+  "optionalAddOnWebsiteModules": [
+    "faq-assistant",
+    "social-content-calendar"
+  ],
+  "includedAutomationModules": [
+    "capture-and-store-lead",
+    "notify-business-owner",
+    "classify-enquiry",
+    "draft-follow-up",
+    "schedule-appointment",
+    "send-approved-reminder"
+  ],
+  "optionalAddOnAutomationModules": [
+    "weekly-performance-report"
+  ],
+  "defaultTechStack": {
+    "frontend": "Angular (Parameterized Component Template)",
+    "backend": "Spring Boot REST API",
+    "database": "PostgreSQL + Optional Google Sheets Sync",
+    "workflowEngine": "n8n",
+    "aiUsage": "Narrowly scoped LLM calls for enquiry classification & follow-up draft generation"
+  },
+  "guardrails": {
+    "maxRevisionRounds": 2,
+    "requiresExplicitApprovalFor": [
+      "External customer WhatsApp/Email messaging activation",
+      "Production domain & DNS cutover",
+      "Paid third-party API credentials binding"
+    ]
+  }
+}

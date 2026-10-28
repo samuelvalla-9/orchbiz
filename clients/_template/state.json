@@ -1,0 +1,41 @@
+{
+  "clientSlug": "replace-with-client-slug",
+  "businessName": "Replace With Business Name",
+  "selectedPackage": "starter-lead-to-appointment",
+  "status": "INTAKE_PENDING",
+  "createdAt": "2026-10-28T00:00:00Z",
+  "updatedAt": "2026-10-28T00:00:00Z",
+  "stages": {
+    "01_business_analyst": { "status": "PENDING", "outputPath": "spec/requirements-brief.md" },
+    "02_solution_architect": { "status": "PENDING", "outputPath": "spec/architecture-plan.json" },
+    "03_brand_and_content": { "status": "PENDING", "outputPath": "deliverables/content/website-copy.json" },
+    "04_website_builder": { "status": "PENDING", "outputPath": "deliverables/website/site.config.json" },
+    "05_workflow_engineer": { "status": "PENDING", "outputPath": "deliverables/automations/workflows-config.json" },
+    "06_qa_and_security": { "status": "PENDING", "outputPath": "qa/qa-report.json" },
+    "07_deployment_and_handover": { "status": "PENDING", "outputPath": "handover/client-handover-guide.md" }
+  },
+  "approvals": {
+    "gate1_scope_and_architecture": {
+      "required": true,
+      "approved": false,
+      "approvedBy": null,
+      "approvedAt": null,
+      "notes": "Requires operator review of spec/requirements-brief.md and spec/technical-spec.md"
+    },
+    "gate2_release_and_deploy": {
+      "required": true,
+      "approved": false,
+      "approvedBy": null,
+      "approvedAt": null,
+      "notes": "Requires operator review of qa/release-checklist.md, staging preview, and client sign-off"
+    }
+  },
+  "auditLog": [
+    {
+      "timestamp": "2026-10-28T00:00:00Z",
+      "actor": "system",
+      "action": "INITIALIZED_CLIENT_STATE_TEMPLATE",
+      "details": "Created initial state skeleton."
+    }
+  ]
+}

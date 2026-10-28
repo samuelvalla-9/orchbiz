@@ -1,0 +1,44 @@
+# Environment & Secrets (NEVER commit credentials)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*credentials*.json
+*secrets*.json
+
+# Client Private Data & Raw Intake Spreadsheets (keep _template tracked)
+clients/*
+!clients/README.md
+!clients/_template/
+!clients/_template/**
+
+# Node / Frontend / Tooling
+node_modules/
+dist/
+build/
+.angular/
+.cache/
+
+# Java / Spring Boot / Maven / Gradle
+target/
+.gradle/
+build/
+*.jar
+*.war
+*.class
+
+# Python / Automation Scripts
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.log
