@@ -1,121 +1,126 @@
 # OrchBiz — Reusable AI Service Delivery Platform
 
-> **A lean, agent-driven service delivery workspace for a one-person software services business.**  
-> Instead of building seven heavyweight internal SaaS tools before serving a single customer, **OrchBiz** combines a **Google Form / Excel Intake Questionnaire**, a **Versioned Reusable Template Catalogue**, **Specialist AI Agents**, and **Deterministic Validation** to assemble, test, and deliver client solutions safely and repeatably.
+**OrchBiz** is a modular, multi-agent service delivery architecture designed to turn structured customer briefs into tested, production-ready web and workflow automation systems.
+
+Instead of treating every client engagement as a bespoke build from scratch, **OrchBiz** combines a **Structured Intake Schema**, a **Versioned Template Catalogue**, **Specialist AI Agents**, and **Deterministic Validation**—keeping consequential actions behind explicit human approval gates.
 
 ---
 
-## 1. Core Philosophy & Architectural Shift
+## Key Capabilities
 
-The original platform blueprint proposed **7 separate internal applications** (Client Intake UI, Project Orchestrator UI, Website Studio, Automation Studio, Content Studio, QA Centre, and Client Operations Portal) backed by a shared platform core.
-
-For a **one-person business**, building and maintaining 7 internal UIs is premature overhead when **AI agents + structured files + deterministic CLI validators** can perform the internal assembly work.
-
-### Do We Need All 7 Applications? (Evaluation Summary)
-
-| # | Blueprint Application | Verdict | Lean Agent-First Replacement in `orchbiz` |
-|---|---|---|---|
-| **1** | **Client Intake & Package Builder** | **Replace with Form/Excel** | A **Google Form / Excel Questionnaire** filled out by the customer (or by you during discovery). Responses export to `.xlsx` / `.csv` and drop into `clients/<slug>/intake/`. |
-| **2** | **Project Orchestrator** | **Replace with Orchestrator Agent + State File** | The **Orchestrator Agent** reads the Excel intake, tracks state in `clients/<slug>/state.json`, delegates to specialist agents, and pauses at explicit human approval gates. |
-| **3** | **Website & Brand Studio** | **Replace with Template Catalogue + Agent** | Versioned code templates in `catalogue/websites/` configured by the **Brand & Content Agent** and **Website Builder Agent** into a previewable client build. |
-| **4** | **Automation Blueprint Studio** | **Replace with n8n Blueprints + Agent** | Parameterized n8n/workflow JSON blueprints in `catalogue/automations/` configured by the **Workflow Engineer Agent** and validated against schemas. |
-| **5** | **Content Production Studio** | **Replace with Structured Agent Outputs** | **Brand & Content Agent** generates structured Markdown/JSON/CSV deliverables (`copy.md`, `faqs.json`, `social-calendar.csv`) directly in the client workspace. |
-| **6** | **QA & Release Centre** | **Replace with CLI Validators + QA Agent** | Deterministic validation scripts + the **QA & Security Agent** verify requirements vs. deliverables, inspect test evidence, check secret hygiene, and produce a release gate checklist. |
-| **7** | **Client Operations Portal** | **Defer to Phase 4** | Replaced initially by a generated **Handover Runbook** (`handover.md`) and the customer's own lightweight **Lead Dashboard** module. Build a portal only when managing 5+ recurring retainer clients. |
-
-> **What we actually build as software:**  
-> We focus engineering effort on the **reusable customer-facing modules** inside `catalogue/` (e.g., the *Lead-to-Appointment System*: Landing Page, Enquiry Form, Lead API/Database, n8n Follow-up & Booking Workflows, and Client Lead Dashboard) and **deterministic validation scripts**—not internal bloatware.
-
-See [`docs/architecture-evaluation.md`](file:///c:/Users/2478356/projects/orchbiz/docs/architecture-evaluation.md) for the full trade-off analysis.
+- **Template-First Engineering:** Assembles solutions from pre-tested, versioned website modules and workflow automation blueprints rather than generating untested code from scratch.
+- **Schema-Driven Intake Pipeline:** Ingests structured customer requirements (via spreadsheet/form exports) and validates them against strict JSON Schemas before planning begins.
+- **Multi-Agent Collaboration with Human Gates:** Specialist agents handle requirement analysis, architecture mapping, brand copy, website configuration, workflow parameterization, and QA—pausing at mandatory human review gates.
+- **Deterministic Quality & Security Enforcement:** Every template defines explicit input/output schemas, required permissions, cost estimates, test cases, and rollback procedures.
+- **Strict Tenant Isolation:** Customer configurations, deliverables, state tracking, and credential references are isolated per engagement.
 
 ---
 
-## 2. End-to-End Delivery Workflow (Excel-to-Agent Pipeline)
+## System Architecture & Delivery Workflow
 
 ```mermaid
 flowchart TD
-    A["1. Customer Discovery\n(Google Form or Operator Interview)"] --> B["2. Intake Spreadsheet (.xlsx / .csv)\nDropped into clients/<client-slug>/intake/"]
-    B --> C["3. Orchestrator Agent\nInitializes state.json & invokes parser"]
-    C --> D["4. Business Analyst Agent\nValidates intake, flags missing info / scope gaps"]
-    D -->|Clarifications Needed| A
-    D -->|Intake Complete| E["5. Solution Architect Agent\nSelects approved modules & creates tech spec"]
-    E --> F{"GATE 1: Human Scope & Cost Approval"}
-    F -->|Approved| G["6. Parallel Specialist Execution"]
-    G --> G1["Brand & Content Agent\nDrafts copy, FAQs, calendar"]
-    G --> G2["Website Builder Agent\nConfigures website template"]
-    G --> G3["Workflow Engineer Agent\nConfigures n8n blueprints"]
-    G1 & G2 & G3 --> H["7. QA & Security Agent + Deterministic Checks\nValidates schemas, tests, secrets, & requirements"]
-    H --> I{"GATE 2: Human Release Approval"}
-    I -->|Approved| J["8. Deployment & Handover Agent\nPrepares staging/prod config, DNS checklist & handover docs"]
+    A["1. Structured Client Intake\n(Spreadsheet / JSON Brief)"] --> B["2. Project Orchestrator\nInitializes Project State & Audit Trail"]
+    B --> C["3. Business Analyst Agent\nSchema Validation, Scope Check & Gap Analysis"]
+    C -->|Missing Info| A
+    C -->|Validated Brief| D["4. Solution Architect Agent\nSelects Catalogue Modules & Verifies Budget"]
+    D --> E{"GATE 1: Scope, Architecture & Cost Approval"}
+    E -->|Approved| F["5. Parallel Specialist Assembly"]
+    F --> F1["Brand & Content Agent\nBrand Tokens, Copy, FAQs & Messaging"]
+    F --> F2["Website Builder Agent\nTemplate Configuration & Preview Build"]
+    F --> F3["Workflow Engineer Agent\nParameterized Automation Blueprints"]
+    F1 & F2 & F3 --> G["6. QA & Security Agent + Deterministic Validators\nRequirement Traceability, Test Evidence & Secret Hygiene"]
+    G --> H{"GATE 2: QA & Release Sign-Off"}
+    H -->|Approved| I["7. Deployment & Handover Agent\nStaging/Prod Checklist, Rollback Plan & Client Guide"]
 ```
 
 ---
 
-## 3. Workspace Structure
+## Reusable Template Catalogue
+
+Every module in [`catalogue/`](catalogue/README.md) adheres to the [`template.schema.json`](catalogue/template.schema.json) contract, specifying its semantic version, input/output schemas, dependencies, supported integrations, configuration fields, operating cost estimate, required permissions, test cases, and rollback approach.
+
+### Website Modules (`catalogue/websites/`)
+| Module ID | Purpose |
+|---|---|
+| `business-landing-page` | Responsive hero, value proposition, trust signals, and primary call-to-action layout |
+| `services-and-pricing` | Structured course/service cards, duration, pricing tiers, and feature comparison |
+| `enquiry-form` | Validated lead capture form connected to backend API and webhook triggers |
+| `appointment-booking` | Calendar slot selection / scheduling integration for consultations or demo sessions |
+| `faq-assistant` | Structured FAQ accordion and verified knowledge-base responses |
+| `lead-dashboard` | Lightweight client-facing dashboard for viewing enquiries, status, and booked appointments |
+| `social-content-calendar` | Structured content schedule, captions, and campaign planner |
+
+### Automation Blueprints (`catalogue/automations/`)
+| Blueprint ID | Purpose |
+|---|---|
+| `capture-and-store-lead` | Validates incoming webhook payload, deduplicates, and persists lead to database/sheet |
+| `notify-business-owner` | Sends instant staff notifications via Email, WhatsApp template, or Slack/Telegram |
+| `classify-enquiry` | Uses narrowly scoped LLM extraction to tag intent, urgency, and service interest |
+| `draft-follow-up` | Prepares personalized, brand-aligned follow-up drafts for review or approved sending |
+| `schedule-appointment` | Syncs confirmed bookings with Google Calendar / scheduling providers |
+| `send-approved-reminder` | Dispatches pre-approved appointment reminders prior to scheduled sessions |
+| `weekly-performance-report` | Aggregates enquiry volume, conversion metrics, and pipeline summary |
+
+---
+
+## Flagship Package: Lead-to-Appointment System
+
+The platform's reference package ([`starter-lead-to-appointment.json`](catalogue/packages/starter-lead-to-appointment.json)) bundles an end-to-end lead capture, qualification, instant staff notification, follow-up drafting, appointment booking, and tracking pipeline tailored for service and training businesses.
+
+- **Recommended Stack:** Angular (Frontend), Spring Boot (REST API), PostgreSQL (Persistence), and n8n (Workflow Automation).
+- **AI Usage Policy:** Models are used selectively for classification, extraction, summarization, and drafting; deterministic code enforces validation, routing rules, and permissions.
+
+---
+
+## Specialist Agent Roster
+
+| Agent Role | Responsibility | Specification |
+|---|---|---|
+| **Project Orchestrator** | Owns project state, task routing, audit logs, and human approval gate enforcement | [`00-orchestrator.md`](agents/prompts/00-orchestrator.md) |
+| **Business Analyst Agent** | Validates intake against schema, identifies missing inputs, and enforces package scope | [`01-business-analyst.md`](agents/prompts/01-business-analyst.md) |
+| **Solution Architect Agent** | Selects approved catalogue templates, maps integrations, and verifies budget limits | [`02-solution-architect.md`](agents/prompts/02-solution-architect.md) |
+| **Brand & Content Agent** | Drafts brand voice tokens, website copy, FAQs, and messaging templates without fabricating claims | [`03-brand-and-content.md`](agents/prompts/03-brand-and-content.md) |
+| **Website Builder Agent** | Binds approved copy and theme tokens into website templates and prepares previews | [`04-website-builder.md`](agents/prompts/04-website-builder.md) |
+| **Workflow Engineer Agent** | Configures automation blueprints, environment variable templates, and webhook test plans | [`05-workflow-engineer.md`](agents/prompts/05-workflow-engineer.md) |
+| **QA & Security Agent** | Audits requirement traceability, test evidence, secret hygiene, and release readiness | [`06-qa-and-security.md`](agents/prompts/06-qa-and-security.md) |
+| **Deployment & Handover Agent** | Produces deployment checklists, rollback runbooks, and client handover documentation | [`07-deployment-and-handover.md`](agents/prompts/07-deployment-and-handover.md) |
+
+---
+
+## Operating Guardrails
+
+1. **Reuse Over Invention:** Solutions are composed from tested catalogue modules rather than generated ad-hoc.
+2. **AI Proposes, Code Validates:** Structured outputs are validated against JSON Schemas and automated checks prior to release.
+3. **Zero Fabricated Claims:** Agents never invent testimonials, certifications, or business metrics; unverified claims are explicitly flagged for client confirmation.
+4. **Explicit Approval Gates:** External messaging activation, paid API usage, DNS changes, and production deployments require explicit human sign-off.
+5. **Tenant & Secret Isolation:** Client data and deliverables remain isolated per workspace, and credentials are referenced exclusively via environment templates.
+
+---
+
+## Repository Structure
 
 ```text
 orchbiz/
-├── README.md                          # Platform overview & operating model
-├── .gitignore                         # Protects client secrets, .env, and raw PII
+├── README.md                          # Architecture overview & platform documentation
 ├── docs/
-│   ├── architecture-evaluation.md     # Detailed review of the 7 apps vs. Agent-First approach
-│   ├── intake-questionnaire-spec.md   # Google Form / Excel questionnaire questions & mapping
-│   ├── agent-workflow.md              # Multi-agent orchestration protocol & approval gates
-│   └── git-workflow.md                # Mandatory CLI-only Git commit & push policy (account isolation)
+│   ├── architecture-evaluation.md     # Lean agentic delivery model vs. traditional internal tooling
+│   ├── intake-questionnaire-spec.md   # Client intake questionnaire specification & field mapping
+│   ├── agent-workflow.md              # Multi-agent collaboration protocol & approval gates
+│   └── copilot-agents-setup.md        # Instructions for configuring selectable IDE Copilot Agents
 ├── intake/
-│   ├── intake.schema.json             # Canonical JSON Schema for validated client intakes
-│   └── questionnaire-template.csv     # Ready-to-use Excel/Google Sheets template with sample row
+│   ├── intake.schema.json             # JSON Schema for validating customer intake briefs
+│   └── questionnaire-template.csv     # Sample intake template (Fictional Coaching Institute demo)
 ├── catalogue/
-│   ├── README.md                      # Rules for authoring & versioning reusable templates
-│   ├── template.schema.json           # Metadata contract required for every template module
-│   ├── packages/
-│   │   └── starter-lead-to-appointment.json # Starter package definition (Coaching Niche)
+│   ├── README.md                      # Template authoring & versioning guide
+│   ├── template.schema.json           # Required metadata contract for all catalogue modules
+│   ├── packages/                      # Bundled service package definitions
 │   ├── websites/                      # Reusable website & UI component templates
-│   └── automations/                   # Reusable n8n / automation workflow blueprints
+│   └── automations/                   # Reusable workflow automation blueprints
 ├── agents/
-│   ├── README.md                      # Agent roster, boundaries, and invocation guide
-│   └── prompts/                       # System prompts & output contracts for each agent role
-│       ├── 00-orchestrator.md
-│       ├── 01-business-analyst.md
-│       ├── 02-solution-architect.md
-│       ├── 03-brand-and-content.md
-│       ├── 04-website-builder.md
-│       ├── 05-workflow-engineer.md
-│       ├── 06-qa-and-security.md
-│       └── 07-deployment-and-handover.md
+│   ├── README.md                      # Agent roster & responsibilities
+│   └── prompts/                       # Role prompts and input/output contracts (00 through 07)
 └── clients/
-    ├── README.md                      # Client isolation rules & per-client folder layout
-    └── _template/                     # Skeleton copied for each new client engagement
-        └── state.json                 # Tracks project phase, module selections, approvals & logs
+    ├── README.md                      # Per-client isolation structure
+    └── _template/                     # State machine & directory skeleton for client projects
 ```
-
----
-
-## 4. Recommended Starting Offer (Phase 1–2 Focus)
-
-- **Target Niche:** Coaching & Training Institutes (or comparable local service businesses).
-- **Starter Package:** `starter-lead-to-appointment` ([package spec](file:///c:/Users/2478356/projects/orchbiz/catalogue/packages/starter-lead-to-appointment.json))
-- **Bundled Reusable Modules:**
-  - **Website Modules:** `business-landing-page`, `services-and-pricing`, `enquiry-form`, `appointment-booking`, `lead-dashboard`
-  - **Automation Modules:** `capture-and-store-lead`, `notify-business-owner`, `classify-enquiry`, `draft-follow-up`, `schedule-appointment`, `send-approved-reminder`
-
----
-
-## 5. Operating Guardrails (Non-Negotiable)
-
-1. **Reuse Over Invention:** Agents select and configure tested templates from `catalogue/`; they do not invent bespoke architectures from scratch unless explicitly authorized.
-2. **AI Proposes, Deterministic Code Validates:** Agents interpret Excel inputs and draft configs/content; schemas and deterministic test suites verify outputs before release.
-3. **Strict Tenant Isolation:** Every customer's intake sheet, config, credentials reference, and deliverables live in an isolated `clients/<client-slug>/` workspace (with secrets excluded from Git).
-4. **Zero Unverified Claims:** Agents must never fabricate customer testimonials, certifications, or business metrics; placeholders requiring client verification are explicitly flagged.
-5. **Human Approval Gates:** External messaging, paid API usage, DNS/domain changes, and production deployments always require explicit operator sign-off in `state.json`.
-6. **Legal & Compliance Hygiene:** Operate exclusively on personal devices, accounts, and time; maintain clear written scopes, revision limits, and customer-owned infrastructure handover.
-7. **CLI-Only Git Account Isolation:** Always commit and push using the Git CLI with repository-local identity (`samuelvalla-9` / `samuelvictorvalla@gmail.com`)—never via the IDE Git UI. See [`docs/git-workflow.md`](file:///c:/Users/2478356/projects/orchbiz/docs/git-workflow.md).
-
----
-
-## 6. How to Start a New Client Engagement
-
-1. **Collect Intake:** Have the client fill out the Google Form, or fill out [`intake/questionnaire-template.csv`](file:///c:/Users/2478356/projects/orchbiz/intake/questionnaire-template.csv) yourself during a discovery call and save it as `.xlsx` or `.csv`.
-2. **Initialize Client Folder:** Copy `clients/_template/` to `clients/<client-slug>/` and place the response sheet in `clients/<client-slug>/intake/`.
-3. **Trigger Orchestrator:** Point the **Orchestrator Agent** ([`agents/prompts/00-orchestrator.md`](file:///c:/Users/2478356/projects/orchbiz/agents/prompts/00-orchestrator.md)) at the client intake file to run Step 1 (Business Analyst intake validation) and Step 2 (Solution Architect technical specification).
-4. **Review & Approve:** Review the generated scope and module plan at **Gate 1**, approve, and let the specialist agents generate the deliverables.

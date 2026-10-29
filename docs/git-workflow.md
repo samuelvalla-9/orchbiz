@@ -71,7 +71,7 @@ git push -u origin main
 ```
 
 #### Zscaler / Network Proxy Fallback (`git zpush` via CLI)
-If the network's Zscaler proxy blocks `POST /samuelvalla-9/orchbiz.git/git-receive-pack` with `HTTP 403 Forbidden (Server: Zscaler/6.2)`, use the globally installed `git zpush` CLI command (located on this machine at `C:\Users\2478356\.git-tools\git-zpush.ps1`), which pushes the Git commit tree atomically over the **GitHub Git Data REST API (`api.github.com`)** using the stored CLI credential (`gh:github.com:samuelvalla-9`) and syncs the local branch ref:
+If the network's Zscaler proxy blocks `POST /samuelvalla-9/orchbiz.git/git-receive-pack` with `HTTP 403 Forbidden (Server: Zscaler/6.2)`, use the globally installed `git zpush` CLI command (located at `$HOME\.git-tools\git-zpush.ps1`), which pushes the Git commit tree atomically over the **GitHub Git Data REST API (`api.github.com`)** using the stored CLI credential (`gh:github.com:samuelvalla-9`) and syncs the local branch ref:
 
 ```powershell
 # Option A: Push already-committed local changes

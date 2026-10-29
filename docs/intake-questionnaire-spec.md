@@ -3,9 +3,9 @@
 This document defines the exact questionnaire structure to use in **Google Forms** (or directly in **Excel** during a live discovery call).
 
 When a response is submitted:
-1. Export the responses from Google Sheets/Forms as `.xlsx` or `.csv` (matching [`intake/questionnaire-template.csv`](file:///c:/Users/2478356/projects/orchbiz/intake/questionnaire-template.csv)).
+1. Export the responses from Google Sheets/Forms as `.xlsx` or `.csv` (matching [`intake/questionnaire-template.csv`](../intake/questionnaire-template.csv)).
 2. Place the file inside `clients/<client-slug>/intake/`.
-3. The **Business Analyst Agent** parses the spreadsheet row, validates it against [`intake/intake.schema.json`](file:///c:/Users/2478356/projects/orchbiz/intake/intake.schema.json), and flags any missing or ambiguous fields before architecture planning begins.
+3. The **Business Analyst Agent** parses the spreadsheet row, validates it against [`intake/intake.schema.json`](../intake/intake.schema.json), and flags any missing or ambiguous fields before architecture planning begins.
 
 ---
 

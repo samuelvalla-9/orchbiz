@@ -37,7 +37,7 @@ catalogue/
 
 ## Module Manifest Contract (`manifest.json`)
 
-Every module folder inside `catalogue/websites/<module-id>/` or `catalogue/automations/<module-id>/` must contain a `manifest.json` adhering to [`catalogue/template.schema.json`](file:///c:/Users/2478356/projects/orchbiz/catalogue/template.schema.json), defining:
+Every module folder inside `catalogue/websites/<module-id>/` or `catalogue/automations/<module-id>/` must contain a `manifest.json` adhering to [`catalogue/template.schema.json`](template.schema.json), defining:
 - `id` & `version` (Semantic Versioning)
 - `category` (`website` | `automation` | `content`)
 - `purpose`

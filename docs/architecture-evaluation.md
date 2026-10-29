@@ -26,14 +26,14 @@ Your proposed workflow—**collecting customer requirements via a Google Form / 
 - **Why:**
   - Google Forms / Microsoft Forms / Tally already provide a polished, mobile-friendly UI with file upload support and zero hosting or maintenance cost.
   - Alternatively, you can fill out the structured Excel template yourself during a 30-minute discovery call with the client.
-  - Google Forms exports directly to `.xlsx` / `.csv`. A tiny deterministic parser (or the **Business Analyst Agent**) maps the spreadsheet row into a validated `intake.json` conforming to [`intake/intake.schema.json`](file:///c:/Users/2478356/projects/orchbiz/intake/intake.schema.json).
+  - Google Forms exports directly to `.xlsx` / `.csv`. A tiny deterministic parser (or the **Business Analyst Agent**) maps the spreadsheet row into a validated `intake.json` conforming to [`intake/intake.schema.json`](../intake/intake.schema.json).
 
 ### 2. Project Orchestrator
 - **Blueprint Proposal:** Custom web app owning project state, task queues, agent assignments, approvals, errors, costs, and audit history.
 - **Decision:** **REPLACE UI WITH WORKSPACE STATE + ORCHESTRATOR AGENT (Phase 1–3).**
 - **Why:**
   - As a solo operator, your IDE/workspace + Git history + a structured `clients/<client-slug>/state.json` file *is* your orchestrator dashboard.
-  - The **Orchestrator Agent** ([`agents/prompts/00-orchestrator.md`](file:///c:/Users/2478356/projects/orchbiz/agents/prompts/00-orchestrator.md)) reads `state.json`, invokes the next specialist agent in sequence, enforces schema validation on its output, logs every step to `state.json`, and halts when `approvalRequired: true`.
+  - The **Orchestrator Agent** ([`agents/prompts/00-orchestrator.md`](../agents/prompts/00-orchestrator.md)) reads `state.json`, invokes the next specialist agent in sequence, enforces schema validation on its output, logs every step to `state.json`, and halts when `approvalRequired: true`.
   - **When to build a backend orchestrator:** Only in Phase 3/4 if you want unattended webhook-triggered background execution after Google Form submission.
 
 ### 3. Website & Brand Studio

@@ -21,7 +21,7 @@ This document specifies how the agents in `orchbiz` collaborate to turn a custom
 - **Output:** Initialized `clients/<client-slug>/state.json` (`status: "INTAKE_RECEIVED"`).
 
 ### Stage 1: Requirement Analysis (`01-business-analyst`)
-- **Input:** Raw Excel/CSV intake file + [`intake/intake.schema.json`](file:///c:/Users/2478356/projects/orchbiz/intake/intake.schema.json) + selected package definition from `catalogue/packages/`.
+- **Input:** Raw Excel/CSV intake file + [`intake/intake.schema.json`](../intake/intake.schema.json) + selected package definition from `catalogue/packages/`.
 - **Responsibilities:**
   - Parse spreadsheet columns into canonical `clients/<client-slug>/intake/intake.validated.json`.
   - Check for missing mandatory inputs, contradictions, or out-of-scope requests.
