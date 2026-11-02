@@ -107,16 +107,24 @@ orchbiz/
 │   ├── architecture-evaluation.md     # Lean agentic delivery model vs. traditional internal tooling
 │   ├── intake-questionnaire-spec.md   # Client intake questionnaire specification & field mapping
 │   ├── agent-workflow.md              # Multi-agent collaboration protocol & approval gates
-│   └── copilot-agents-setup.md        # Instructions for configuring selectable IDE Copilot Agents
+│   ├── copilot-agents-setup.md        # Instructions for configuring selectable IDE Copilot Agents
+│   └── orchbiz-setup-and-trial-run-guide.md  # Step-by-step usage, trial run, current status & roadmap
 ├── intake/
 │   ├── intake.schema.json             # JSON Schema for validating customer intake briefs
 │   └── questionnaire-template.csv     # Sample intake template (Fictional Coaching Institute demo)
 ├── catalogue/
 │   ├── README.md                      # Template authoring & versioning guide
 │   ├── template.schema.json           # Required metadata contract for all catalogue modules
+│   ├── fx-rates.json                  # Operator-maintained currency rates for budget checks
 │   ├── packages/                      # Bundled service package definitions
-│   ├── websites/                      # Reusable website & UI component templates
-│   └── automations/                   # Reusable workflow automation blueprints
+│   ├── websites/                      # Website module manifests (contract-only, v0.1.0)
+│   └── automations/                   # Automation module manifests (contract-only, v0.1.0)
+├── schemas/                           # JSON Schemas for state and every agent output artifact
+├── tools/
+│   ├── README.md                      # OrchBiz CLI commands, exit codes & hook install
+│   ├── orchbiz.ps1 / orchbiz          # CLI wrappers (build the jar on first run)
+│   ├── orchbiz-cli/                   # Java 17 / Maven source and tests for the CLI
+│   └── hooks/pre-commit               # Blocks client files and secrets from being committed
 ├── agents/
 │   ├── README.md                      # Agent roster & responsibilities
 │   └── prompts/                       # Role prompts and input/output contracts (00 through 07)

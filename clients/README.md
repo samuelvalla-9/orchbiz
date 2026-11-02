@@ -8,7 +8,7 @@ Every customer engagement is strictly isolated in its own directory: `clients/<c
 
 ## Standard Per-Client Folder Structure
 
-When onboarding a new customer, copy `clients/_template/` to `clients/<client-slug>/`:
+When onboarding a new customer, run `.\tools\orchbiz.ps1 init-client <client-slug> --business-name "<name>"`. It creates the folders below and `state.json` from `clients/_template/` (and refuses to overwrite an existing client). The pre-commit hook (`git config core.hooksPath tools/hooks`) blocks any accidental commit of client files.
 
 ```text
 clients/<client-slug>/

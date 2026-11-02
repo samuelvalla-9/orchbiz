@@ -46,6 +46,12 @@ Whenever an agent is instructed to commit and push changes in `orchbiz`:
 ### Step 1: Pre-Commit Security & Hygiene Check
 1. Run `git status` via the CLI to inspect all modified and untracked files.
 2. Verify that **no** files under `clients/*` (other than `clients/README.md` and `clients/_template/**`), `.env*`, credentials, or customer PII are staged.
+3. Make sure the automated pre-commit hook is installed (once per clone). It blocks staged client engagement data and runs `orchbiz scan-secrets --staged`:
+   ```powershell
+   git config core.hooksPath tools/hooks
+   git config --get core.hooksPath   # expect: tools/hooks
+   ```
+   If the scanner flags a deliberately fake example in documentation, add the marker `orchbiz:allow-secret` to that line instead of bypassing the hook. Use `--no-verify` only after a manual review, and never for client data.
 
 ### Step 2: Stage & Commit via CLI (Explicit Identity Enforcement)
 Always include `-c user.name="samuelvalla-9" -c user.email="samuelvictorvalla@gmail.com"` or verify `--local` config before committing:

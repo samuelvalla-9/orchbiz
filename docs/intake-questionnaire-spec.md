@@ -3,9 +3,9 @@
 This document defines the exact questionnaire structure to use in **Google Forms** (or directly in **Excel** during a live discovery call).
 
 When a response is submitted:
-1. Export the responses from Google Sheets/Forms as `.xlsx` or `.csv` (matching [`intake/questionnaire-template.csv`](../intake/questionnaire-template.csv)).
-2. Place the file inside `clients/<client-slug>/intake/`.
-3. The **Business Analyst Agent** parses the spreadsheet row, validates it against [`intake/intake.schema.json`](../intake/intake.schema.json), and flags any missing or ambiguous fields before architecture planning begins.
+1. Export the responses from Google Sheets/Forms as `.xlsx` or `.csv` (matching [`intake/questionnaire-template.csv`](../intake/questionnaire-template.csv)). Rename the form's question columns to the **Column Key** values below (a `Timestamp` column is mapped to `submission_date` automatically).
+2. Place the file inside `clients/<client-slug>/intake/` (create the folder with `.\tools\orchbiz.ps1 init-client <client-slug>`).
+3. Run `.\tools\orchbiz.ps1 parse-intake <client-slug>`. It splits list fields, converts consent to a boolean, derives budget amount/currency, validates against [`intake/intake.schema.json`](../intake/intake.schema.json) and writes `intake/intake.validated.json`. The **Business Analyst Agent** then flags any missing or ambiguous fields before architecture planning begins.
 
 ---
 
@@ -62,8 +62,12 @@ When a response is submitted:
 |---|---|---|---|---|
 | `existing_domain` | Existing Domain Name (if any, e.g., `example.com`) | Short Text | No | Used by Deployment & Handover Agent |
 | `hosting_preference` | Hosting & Deployment Preference | Dropdown | Yes | `Client-Owned Cloud Account`, `Operator-Managed Hosting`, `Decide Later` |
-| `setup_budget_limit` | Agreed Setup / Implementation Budget (Currency + Amount) | Short Text | Yes | Solution Architect checks scope against budget |
-| `monthly_ops_budget` | Max Monthly Third-Party Tool/Hosting Budget | Short Text | Yes | Solution Architect ensures monthly costs stay within limit |
+| `setup_budget_limit` | Agreed Setup / Implementation Budget (Currency + Amount) | Short Text | Legacy | Optional free text; `orchbiz parse-intake` derives the two fields below from it when they are blank |
+| `monthly_ops_budget` | Max Monthly Third-Party Tool/Hosting Budget | Short Text | Legacy | Optional free text, e.g. `INR 2500/month` |
+| `setup_budget_amount` | Setup budget amount (number only) | Number | Yes | Solution Architect checks scope against budget |
+| `setup_budget_currency` | Setup budget currency | Dropdown | Yes | ISO 4217 code: `INR`, `USD`, `EUR`, `GBP`, ... |
+| `monthly_ops_budget_amount` | Max monthly tool/hosting budget (number only) | Number | Yes | `orchbiz check-budget` compares this with catalogue cost estimates |
+| `monthly_ops_budget_currency` | Monthly budget currency | Dropdown | Yes | Converted to USD with the operator-maintained rates in [`catalogue/fx-rates.json`](../catalogue/fx-rates.json) |
 | `target_launch_date` | Target Go-Live Date | Date | Yes | Drives project plan milestones |
 | `ai_data_consent` | Client consents to processing non-sensitive business & enquiry text via approved AI APIs? | Yes / No | Yes | **Mandatory Operating Guardrail** |
 | `operator_notes` | Operator Internal Notes / Special Constraints | Paragraph | No | Extra context from your discovery call |

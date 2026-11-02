@@ -58,7 +58,7 @@ Your proposed workflow—**collecting customer requirements via a Google Form / 
 - **Why:**
   - Customers prefer reviewing website copy and social calendars in Google Docs / Google Sheets / Excel or Markdown previews rather than logging into a proprietary CMS.
   - The **Brand & Content Agent** reads the intake Excel file and produces:
-    - `brand-voice-guide.md`
+    - `brand-voice.md`
     - `website-copy.json` (ready for the Website Builder Agent)
     - `social-content-calendar.csv` (ready to share with the customer as an Excel/Sheet file)
 
@@ -67,7 +67,7 @@ Your proposed workflow—**collecting customer requirements via a Google Form / 
 - **Decision:** **REPLACE WITH CLI VALIDATION SUITE + QA & SECURITY AGENT.**
 - **Why:**
   - Deterministic quality checks belong in automated scripts (JSON Schema validation, Playwright/Lighthouse checks, secret scanning, endpoint smoke tests).
-  - The **QA & Security Agent** executes these scripts, inspects the test evidence, cross-checks every item in the customer's intake brief against the generated deliverables, and writes `qa-report.md` + `release-checklist.md`.
+  - The **QA & Security Agent** executes these scripts, inspects the test evidence, cross-checks every item in the customer's intake brief against the generated deliverables, and writes `qa-report.json` + `release-checklist.md`.
 
 ### 7. Client Operations Portal
 - **Blueprint Proposal:** Customer-facing portal for handover docs, account links, support requests, uptime alerts, and usage metrics.
