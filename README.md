@@ -118,7 +118,13 @@ orchbiz/
 │   ├── fx-rates.json                  # Operator-maintained currency rates for budget checks
 │   ├── packages/                      # Bundled service package definitions
 │   ├── websites/                      # Website module manifests (contract-only, v0.1.0)
-│   └── automations/                   # Automation module manifests (contract-only, v0.1.0)
+│   └── automations/                   # Automation manifests + n8n blueprints (*.workflow.json)
+├── platform/
+│   ├── lead-api/                      # Spring Boot lead API: POST /api/leads, Postgres, n8n event outbox
+│   └── local/postgres-init/           # DB bootstrap used by docker-compose
+├── docker-compose.yml                 # Local stack: PostgreSQL + n8n + lead API (copy .env.example → .env)
+├── .env.example                       # Placeholder variables for the local stack (never commit .env)
+├── .github/workflows/ci.yml           # CI: build/test CLI + lead API, validate catalogue, scan secrets
 ├── schemas/                           # JSON Schemas for state and every agent output artifact
 ├── tools/
 │   ├── README.md                      # OrchBiz CLI commands, exit codes & hook install
