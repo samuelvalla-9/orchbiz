@@ -1,0 +1,70 @@
+# OrchBiz local/staging stack: PostgreSQL + n8n + lead API.
+# Untested on the corporate build device (no Docker there). Usage:
+#   copy .env.example .env    (then fill in every value; never commit .env)
+#   docker compose up -d --build
+# Lead API: http://localhost:8080   n8n editor: http://localhost:5678
+name: orchbiz
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: orchbiz
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./platform/local/postgres-init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d orchbiz"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: ${POSTGRES_USER}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?set in .env}
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      WEBHOOK_URL: http://localhost:5678/
+      GENERIC_TIMEZONE: ${TZ:-UTC}
+      N8N_DIAGNOSTICS_ENABLED: "false"
+    volumes:
+      - n8n-data:/home/node/.n8n
+    ports:
+      - "127.0.0.1:5678:5678"
+
+  lead-api:
+    build: ./platform/lead-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/orchbiz
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      ORCHBIZ_ADMIN_TOKEN: ${ORCHBIZ_ADMIN_TOKEN:?set in .env}
+      ORCHBIZ_ALLOWED_ORIGINS: ${ORCHBIZ_ALLOWED_ORIGINS:-http://localhost:4200}
+      LEAD_EVENTS_WEBHOOK_URL: http://n8n:5678/webhook/orchbiz/lead-events
+      LEAD_EVENTS_WEBHOOK_TOKEN: ${LEAD_EVENTS_WEBHOOK_TOKEN:?set in .env}
+    ports:
+      - "127.0.0.1:8080:8080"
+
+volumes:
+  postgres-data:
+  n8n-data:
