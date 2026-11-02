@@ -1,0 +1,44 @@
+{
+  "id": "business-landing-page",
+  "version": "0.1.0",
+  "category": "website",
+  "purpose": "Responsive single-page layout with hero, value proposition, differentiators, testimonials, about and footer sections, rendered entirely from site.config.json and website-copy.json.",
+  "implementationStatus": "contract-only",
+  "inputSchema": {
+    "type": "object",
+    "required": ["siteConfig", "websiteCopy"],
+    "properties": {
+      "siteConfig": { "$ref": "https://orchbiz.local/schemas/site-config.schema.json" },
+      "websiteCopy": { "$ref": "https://orchbiz.local/schemas/website-copy.schema.json" }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "description": "Static build artefacts for the landing page route.",
+    "properties": {
+      "route": { "const": "/" },
+      "buildDir": { "type": "string" }
+    }
+  },
+  "dependencies": [],
+  "supportedIntegrations": ["Static hosting / CDN", "Google Analytics (optional)"],
+  "configurationFields": [
+    { "key": "theme.primaryColor", "type": "hex-color", "required": true, "description": "Primary brand colour" },
+    { "key": "theme.secondaryColor", "type": "hex-color", "required": true, "description": "Accent colour for CTAs" },
+    { "key": "assets.logoUrl", "type": "url", "required": false, "description": "Logo; a text wordmark is used when absent" },
+    { "key": "hero", "type": "object", "required": true, "description": "Headline, subheadline and primary CTA from website-copy.json" },
+    { "key": "seo.title", "type": "string", "required": false, "default": "<businessName>", "description": "HTML title / Open Graph title" }
+  ],
+  "estimatedMonthlyCostUSD": 0,
+  "permissionsRequired": [],
+  "testCases": [
+    { "id": "BLP-01", "description": "Render with the apex-coaching sample config at 360px, 768px and 1280px widths", "expectedOutcome": "No horizontal scroll; hero CTA visible above the fold on all widths" },
+    { "id": "BLP-02", "description": "Run axe accessibility scan on the rendered page", "expectedOutcome": "Zero serious or critical violations; colour contrast passes WCAG AA" },
+    { "id": "BLP-03", "description": "Render with an empty testimonials array", "expectedOutcome": "Testimonials section is omitted, not shown empty" }
+  ],
+  "knownLimitations": [
+    "Contract only: Angular implementation not yet built (Phase B).",
+    "Single-language content only."
+  ],
+  "rollbackApproach": "Redeploy the previous static build artefact (kept per release tag) to the hosting provider."
+}

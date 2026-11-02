@@ -1,0 +1,47 @@
+{
+  "id": "classify-enquiry",
+  "version": "0.1.0",
+  "category": "automation",
+  "purpose": "Uses a narrowly scoped LLM extraction call to tag each enquiry with intent, urgency and service interest, validated against a fixed label set before saving.",
+  "implementationStatus": "contract-only",
+  "inputSchema": {
+    "type": "object",
+    "required": ["leadId", "tenantId", "message"],
+    "properties": {
+      "leadId": { "type": "string" },
+      "tenantId": { "type": "string" },
+      "message": { "type": "string" },
+      "courseInterest": { "type": "string" }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "required": ["intent", "urgency", "serviceInterest", "confidence"],
+    "properties": {
+      "intent": { "enum": ["enrolment", "pricing", "demo-request", "schedule-question", "support", "other"] },
+      "urgency": { "enum": ["high", "normal", "low"] },
+      "serviceInterest": { "type": "string", "description": "Must equal one of the configured service names or 'unknown'" },
+      "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+    }
+  },
+  "dependencies": ["capture-and-store-lead"],
+  "supportedIntegrations": ["OpenAI API", "Azure OpenAI", "Anthropic API"],
+  "configurationFields": [
+    { "key": "serviceNames", "type": "array", "required": true, "description": "From services-and-pricing; constrains serviceInterest" },
+    { "key": "llmCredentialRef", "type": "credential-ref", "required": true, "description": "LLM_API_REF" },
+    { "key": "model", "type": "string", "required": true, "description": "Small, low-cost model name" },
+    { "key": "minConfidence", "type": "number", "required": false, "default": 0.6, "description": "Below this, label as 'other' and flag for staff review" }
+  ],
+  "estimatedMonthlyCostUSD": 1,
+  "permissionsRequired": ["Send enquiry text to the configured LLM provider (requires intake ai_data_consent=true)"],
+  "testCases": [
+    { "id": "CLE-01", "description": "Message 'Is there a demo class this Saturday for the Target batch?'", "expectedOutcome": "intent=demo-request; serviceInterest matches the Target batch name" },
+    { "id": "CLE-02", "description": "LLM returns a label outside the enum", "expectedOutcome": "Rejected by validation; stored as other with review flag" },
+    { "id": "CLE-03", "description": "LLM provider timeout", "expectedOutcome": "Lead remains stored; classification marked pending; no crash" }
+  ],
+  "knownLimitations": [
+    "Contract only: n8n blueprint JSON not yet built and exported (Phase B).",
+    "English-only prompt; mixed-language messages may get lower confidence."
+  ],
+  "rollbackApproach": "Deactivate the workflow; leads continue without tags and staff triage manually."
+}

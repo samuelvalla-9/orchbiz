@@ -1,0 +1,43 @@
+{
+  "id": "weekly-performance-report",
+  "version": "0.1.0",
+  "category": "automation",
+  "purpose": "Scheduled weekly summary of enquiry volume, source pages, classification mix, appointments booked and follow-up response times, emailed to the business owner.",
+  "implementationStatus": "contract-only",
+  "inputSchema": {
+    "type": "object",
+    "required": ["tenantId", "weekStart"],
+    "properties": {
+      "tenantId": { "type": "string" },
+      "weekStart": { "type": "string" }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "required": ["leads", "appointments"],
+    "properties": {
+      "leads": { "type": "integer" },
+      "appointments": { "type": "integer" },
+      "byIntent": { "type": "object" },
+      "medianFirstResponseMinutes": { "type": ["number", "null"] }
+    }
+  },
+  "dependencies": ["capture-and-store-lead"],
+  "supportedIntegrations": ["SMTP / Gmail", "Google Sheets"],
+  "configurationFields": [
+    { "key": "schedule", "type": "cron", "required": true, "default": "0 9 * * MON", "description": "Local time of the tenant" },
+    { "key": "recipients", "type": "array", "required": true, "description": "Business owner email(s)" },
+    { "key": "smtpCredentialRef", "type": "credential-ref", "required": true, "description": "SMTP_CREDENTIAL_REF" }
+  ],
+  "estimatedMonthlyCostUSD": 0,
+  "permissionsRequired": ["Read-only access to the tenant's leads and appointments"],
+  "testCases": [
+    { "id": "WPR-01", "description": "Run for a week with seeded test data", "expectedOutcome": "Counts match a direct SQL query on the same data" },
+    { "id": "WPR-02", "description": "Run for a week with no leads", "expectedOutcome": "Report sent with zeros; no errors" }
+  ],
+  "knownLimitations": [
+    "Contract only: n8n blueprint JSON not yet built and exported (Phase B).",
+    "No conversion-to-enrolment metric unless staff update lead status."
+  ],
+  "rollbackApproach": "Deactivate the scheduled workflow; no data is modified by this module."
+}

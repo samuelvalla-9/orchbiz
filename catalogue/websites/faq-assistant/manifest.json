@@ -1,0 +1,51 @@
+{
+  "id": "faq-assistant",
+  "version": "0.1.0",
+  "category": "website",
+  "purpose": "Searchable FAQ accordion built only from client-approved question and answer pairs, with a fallback CTA to the enquiry form when no answer matches.",
+  "implementationStatus": "contract-only",
+  "inputSchema": {
+    "type": "object",
+    "required": ["faq"],
+    "properties": {
+      "faq": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["question", "answer", "source"],
+          "properties": {
+            "question": { "type": "string" },
+            "answer": { "type": "string" },
+            "source": { "enum": ["intake", "suggested-needs-client-approval"] }
+          }
+        }
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "sectionId": { "const": "faq" },
+      "faqJsonLd": { "type": "object", "description": "schema.org FAQPage structured data" }
+    }
+  },
+  "dependencies": ["business-landing-page"],
+  "supportedIntegrations": [],
+  "configurationFields": [
+    { "key": "faq", "type": "array", "required": true, "description": "From website-copy.json faq[]" },
+    { "key": "showSearch", "type": "boolean", "required": false, "default": true, "description": "Client-side keyword filter" },
+    { "key": "publishSuggested", "type": "boolean", "required": false, "default": false, "description": "Must stay false until the client approves suggested FAQs" }
+  ],
+  "estimatedMonthlyCostUSD": 0,
+  "permissionsRequired": [],
+  "testCases": [
+    { "id": "FAQ-01", "description": "Render with suggested FAQs and publishSuggested=false", "expectedOutcome": "Only source=intake entries are shown" },
+    { "id": "FAQ-02", "description": "Search for a term with no match", "expectedOutcome": "Fallback CTA to the enquiry form is displayed" },
+    { "id": "FAQ-03", "description": "Validate FAQPage JSON-LD", "expectedOutcome": "Passes schema.org validator" }
+  ],
+  "knownLimitations": [
+    "Contract only: Angular implementation not yet built (Phase B).",
+    "No generative chat answers; static, approved content only."
+  ],
+  "rollbackApproach": "Remove the module from enabledModules and redeploy."
+}

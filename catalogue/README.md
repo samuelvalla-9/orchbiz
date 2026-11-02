@@ -15,6 +15,7 @@ Agents must select approved template IDs from this catalogue, verify they belong
 catalogue/
 ├── README.md
 ├── template.schema.json                      # Metadata schema every module manifest must satisfy
+├── fx-rates.json                             # Operator-maintained currency rates for budget checks
 ├── packages/
 │   └── starter-lead-to-appointment.json      # Bundled offer definitions
 ├── websites/                                 # Website & UI module templates
@@ -45,8 +46,11 @@ Every module folder inside `catalogue/websites/<module-id>/` or `catalogue/autom
 - `dependencies` (other module IDs required)
 - `supportedIntegrations`
 - `configurationFields`
-- `estimatedMonthlyOperatingCost`
+- `estimatedMonthlyCostUSD` (operator estimate; summed by `tools/orchbiz.ps1 check-budget` and converted with `catalogue/fx-rates.json`)
 - `permissionsRequired`
 - `testCases`
 - `knownLimitations`
 - `rollbackApproach`
+- `implementationStatus` (optional: `contract-only` | `in-development` | `tested`; `contract-only` output must be labelled as a draft)
+
+All 14 module manifests exist at `0.1.0` with `implementationStatus: "contract-only"`: the contracts are defined but the template code and n8n blueprints are not built yet. Run `.\tools\orchbiz.ps1 validate-catalogue` after any change. Package definitions are validated against `schemas/package.schema.json`; `baseInfrastructure.estimatedMonthlyCostUSD` covers shared hosting cost.

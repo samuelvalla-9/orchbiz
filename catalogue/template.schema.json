@@ -94,6 +94,11 @@
     },
     "rollbackApproach": {
       "type": "string"
+    },
+    "implementationStatus": {
+      "type": "string",
+      "enum": ["contract-only", "in-development", "tested"],
+      "description": "contract-only: manifest exists but no tested implementation; agents must label generated configuration as drafts. tested: implementation and test cases pass in CI."
     }
   },
   "additionalProperties": false

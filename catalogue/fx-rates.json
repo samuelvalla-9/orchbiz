@@ -1,0 +1,16 @@
+{
+  "description": "Operator-maintained conversion rates used by `orchbiz check-budget`. Units of each currency per 1 USD. Review and update before quoting a client; these are planning estimates, not live market rates.",
+  "asOf": "2026-10-29",
+  "maintainedBy": "operator",
+  "operatorReviewRequired": true,
+  "ratesPerUSD": {
+    "USD": 1,
+    "INR": 88,
+    "EUR": 0.92,
+    "GBP": 0.79,
+    "AED": 3.67,
+    "SGD": 1.35,
+    "AUD": 1.52,
+    "CAD": 1.38
+  }
+}

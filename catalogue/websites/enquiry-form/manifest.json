@@ -1,0 +1,48 @@
+{
+  "id": "enquiry-form",
+  "version": "0.1.0",
+  "category": "website",
+  "purpose": "Validated lead capture form with client-side and server-side validation, consent text, spam protection and submission to the lead API / capture webhook.",
+  "implementationStatus": "contract-only",
+  "inputSchema": {
+    "type": "object",
+    "required": ["fields", "submitEndpoint"],
+    "properties": {
+      "fields": { "type": "array", "minItems": 2 },
+      "submitEndpoint": { "type": "string" },
+      "consentText": { "type": "string" }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "description": "JSON payload POSTed to submitEndpoint",
+    "required": ["tenantId", "submittedAt", "fields"],
+    "properties": {
+      "tenantId": { "type": "string" },
+      "submittedAt": { "type": "string" },
+      "sourcePage": { "type": "string" },
+      "fields": { "type": "object" }
+    }
+  },
+  "dependencies": ["capture-and-store-lead"],
+  "supportedIntegrations": ["OrchBiz lead API (Spring Boot)", "n8n webhook", "Cloudflare Turnstile / hCaptcha"],
+  "configurationFields": [
+    { "key": "enquiryForm.fields", "type": "array", "required": true, "description": "Field name, label, type, required flag and validation rules" },
+    { "key": "enquiryForm.submitEndpoint", "type": "string", "required": true, "description": "Relative path or ${API_BASE_URL} placeholder" },
+    { "key": "enquiryForm.consentText", "type": "string", "required": false, "description": "Data-use consent shown above the submit button" },
+    { "key": "captchaSiteKeyRef", "type": "credential-ref", "required": false, "description": "CAPTCHA_SITE_KEY_REF; never inline" }
+  ],
+  "estimatedMonthlyCostUSD": 0,
+  "permissionsRequired": ["Public HTTPS endpoint for lead submission"],
+  "testCases": [
+    { "id": "ENQ-01", "description": "Submit with all required fields valid", "expectedOutcome": "HTTP 201 from endpoint; success message shown; lead stored once" },
+    { "id": "ENQ-02", "description": "Submit with invalid email and empty required field", "expectedOutcome": "Inline errors; no request sent" },
+    { "id": "ENQ-03", "description": "Bypass client validation and POST an invalid payload directly", "expectedOutcome": "HTTP 400 with field errors; nothing stored" },
+    { "id": "ENQ-04", "description": "Keyboard-only completion and screen-reader labels", "expectedOutcome": "All fields reachable and labelled; errors announced" }
+  ],
+  "knownLimitations": [
+    "Contract only: Angular implementation not yet built (Phase B).",
+    "File uploads are not supported."
+  ],
+  "rollbackApproach": "Point submitEndpoint back to the previous API version or temporarily replace the form with a mailto/phone CTA via config and redeploy."
+}

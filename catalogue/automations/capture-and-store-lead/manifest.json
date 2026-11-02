@@ -1,0 +1,50 @@
+{
+  "id": "capture-and-store-lead",
+  "version": "0.1.0",
+  "category": "automation",
+  "purpose": "n8n webhook workflow that validates an enquiry payload, normalises phone/email, deduplicates by tenant + contact, persists the lead and emits a lead.created event.",
+  "implementationStatus": "contract-only",
+  "inputSchema": {
+    "type": "object",
+    "required": ["tenantId", "submittedAt", "fields"],
+    "properties": {
+      "tenantId": { "type": "string" },
+      "submittedAt": { "type": "string" },
+      "sourcePage": { "type": "string" },
+      "fields": { "type": "object" }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "required": ["leadId", "tenantId", "duplicate"],
+    "properties": {
+      "leadId": { "type": "string" },
+      "tenantId": { "type": "string" },
+      "duplicate": { "type": "boolean" },
+      "storedIn": { "type": "array", "items": { "enum": ["postgresql", "google-sheets", "airtable"] } }
+    }
+  },
+  "dependencies": [],
+  "supportedIntegrations": ["PostgreSQL", "Google Sheets", "Airtable"],
+  "configurationFields": [
+    { "key": "webhookPath", "type": "string", "required": true, "default": "/webhook/<tenant>/lead", "description": "n8n webhook path, unique per tenant" },
+    { "key": "requiredFields", "type": "array", "required": true, "description": "Mapped from intake enquiry_fields" },
+    { "key": "dedupeWindowHours", "type": "integer", "required": false, "default": 24, "description": "Same contact within window updates the existing lead" },
+    { "key": "storageTargets", "type": "array", "required": true, "description": "From intake lead_storage_target" },
+    { "key": "postgresCredentialRef", "type": "credential-ref", "required": true, "description": "POSTGRES_CREDENTIAL_REF" },
+    { "key": "sheetsCredentialRef", "type": "credential-ref", "required": false, "description": "GOOGLE_SHEETS_OAUTH_REF when Google Sheets is a target" }
+  ],
+  "estimatedMonthlyCostUSD": 0,
+  "permissionsRequired": ["Insert/update on the tenant's leads table", "Append rows to the client's lead sheet (if selected)"],
+  "testCases": [
+    { "id": "CSL-01", "description": "POST a valid payload", "expectedOutcome": "200 with leadId; one row in leads with tenant_id set" },
+    { "id": "CSL-02", "description": "POST the same contact twice within the dedupe window", "expectedOutcome": "Second response duplicate=true; still one lead row" },
+    { "id": "CSL-03", "description": "POST a payload missing a required field", "expectedOutcome": "400; nothing stored; no downstream events" },
+    { "id": "CSL-04", "description": "POST with a tenantId that does not match the webhook path", "expectedOutcome": "403; nothing stored" }
+  ],
+  "knownLimitations": [
+    "Contract only: n8n blueprint JSON not yet built and exported (Phase B).",
+    "Sheets sync is append-only."
+  ],
+  "rollbackApproach": "Deactivate the workflow in n8n and re-import the previous exported version; the form falls back to the API's own persistence."
+}

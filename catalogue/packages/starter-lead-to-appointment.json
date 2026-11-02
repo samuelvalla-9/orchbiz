@@ -33,6 +33,16 @@
     "workflowEngine": "n8n",
     "aiUsage": "Narrowly scoped LLM calls for enquiry classification & follow-up draft generation"
   },
+  "baseInfrastructure": {
+    "estimatedMonthlyCostUSD": 15,
+    "operatorReviewRequired": true,
+    "assumptions": [
+      "Shared small VM or PaaS instance hosting the Spring Boot API and self-hosted n8n (~USD 10)",
+      "Managed PostgreSQL free/hobby tier or same-host PostgreSQL (~USD 0-5)",
+      "Static Angular site on a free static host/CDN tier (~USD 0)",
+      "Domain registration and paid email/WhatsApp provider fees are billed to the client separately"
+    ]
+  },
   "guardrails": {
     "maxRevisionRounds": 2,
     "requiresExplicitApprovalFor": [

@@ -1,0 +1,42 @@
+{
+  "id": "social-content-calendar",
+  "version": "0.1.0",
+  "category": "website",
+  "purpose": "Four-week social media content plan with post themes, captions, hashtags and suggested visuals, delivered as a CSV the client can open in Excel or Google Sheets.",
+  "implementationStatus": "contract-only",
+  "inputSchema": {
+    "type": "object",
+    "required": ["brandVoice", "services", "weeks"],
+    "properties": {
+      "brandVoice": { "type": "string" },
+      "services": { "type": "array" },
+      "weeks": { "type": "integer", "minimum": 1, "maximum": 12 },
+      "channels": { "type": "array", "items": { "enum": ["Instagram", "Facebook", "LinkedIn", "YouTube Shorts", "WhatsApp Status"] } }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "description": "deliverables/content/social-content-calendar.csv columns",
+    "properties": {
+      "columns": { "const": ["date", "channel", "theme", "caption", "hashtags", "visual_brief", "cta", "status"] }
+    }
+  },
+  "dependencies": [],
+  "supportedIntegrations": ["Google Sheets", "Excel"],
+  "configurationFields": [
+    { "key": "weeks", "type": "integer", "required": false, "default": 4, "description": "Number of weeks to plan" },
+    { "key": "channels", "type": "array", "required": true, "description": "Social channels the client actually uses" },
+    { "key": "postsPerWeek", "type": "integer", "required": false, "default": 3, "description": "Posting cadence" }
+  ],
+  "estimatedMonthlyCostUSD": 0,
+  "permissionsRequired": [],
+  "testCases": [
+    { "id": "SCC-01", "description": "Generate a 4-week plan for 2 channels at 3 posts/week", "expectedOutcome": "24 rows with all columns filled and status=draft" },
+    { "id": "SCC-02", "description": "Scan captions for statistics or results claims", "expectedOutcome": "None present unless sourced from intake and flagged" }
+  ],
+  "knownLimitations": [
+    "Contract only: generation rules not yet encoded as a tested template.",
+    "No automatic publishing to social networks."
+  ],
+  "rollbackApproach": "Deliverable is a document; replace with the previous approved CSV version."
+}

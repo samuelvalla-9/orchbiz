@@ -1,0 +1,45 @@
+{
+  "id": "send-approved-reminder",
+  "version": "0.1.0",
+  "category": "automation",
+  "purpose": "Sends pre-approved appointment reminders to prospects at configured offsets before a confirmed appointment, honouring opt-outs and quiet hours.",
+  "implementationStatus": "contract-only",
+  "inputSchema": {
+    "type": "object",
+    "required": ["appointmentId", "tenantId"],
+    "properties": {
+      "appointmentId": { "type": "string" },
+      "tenantId": { "type": "string" }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "remindersSent": { "type": "integer" },
+      "mode": { "enum": ["dry-run", "staging", "live"] },
+      "skippedReason": { "type": "string" }
+    }
+  },
+  "dependencies": ["schedule-appointment"],
+  "supportedIntegrations": ["SMTP / Gmail", "WhatsApp Business Cloud API (approved template)"],
+  "configurationFields": [
+    { "key": "offsetsHours", "type": "array", "required": true, "default": [24, 2], "description": "Hours before the appointment" },
+    { "key": "approvedTemplateIds", "type": "array", "required": true, "description": "Only client-approved templates may be sent" },
+    { "key": "quietHours", "type": "string", "required": false, "default": "21:00-08:00", "description": "No messages sent in this local-time window" },
+    { "key": "mode", "type": "enum(dry-run|staging|live)", "required": true, "default": "dry-run", "description": "live only after Gate 2 and operator activation" },
+    { "key": "whatsappCredentialRef", "type": "credential-ref", "required": false, "description": "WHATSAPP_API_REF" },
+    { "key": "smtpCredentialRef", "type": "credential-ref", "required": false, "description": "SMTP_CREDENTIAL_REF" }
+  ],
+  "estimatedMonthlyCostUSD": 3,
+  "permissionsRequired": ["Send email / WhatsApp template messages to prospects who gave contact consent"],
+  "testCases": [
+    { "id": "SAR-01", "description": "Confirmed appointment 24h ahead in dry-run", "expectedOutcome": "Reminder rendered and logged; nothing sent" },
+    { "id": "SAR-02", "description": "Prospect has opted out", "expectedOutcome": "No reminder; skippedReason=opted-out" },
+    { "id": "SAR-03", "description": "Reminder due inside quiet hours", "expectedOutcome": "Deferred to end of quiet hours" }
+  ],
+  "knownLimitations": [
+    "Contract only: n8n blueprint JSON not yet built and exported (Phase B).",
+    "WhatsApp messages incur per-message provider fees billed to the client's Meta account."
+  ],
+  "rollbackApproach": "Set mode=dry-run or deactivate the workflow in n8n immediately; no queued messages are sent after deactivation."
+}

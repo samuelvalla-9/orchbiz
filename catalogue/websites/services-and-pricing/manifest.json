@@ -1,0 +1,53 @@
+{
+  "id": "services-and-pricing",
+  "version": "0.1.0",
+  "category": "website",
+  "purpose": "Card grid of courses or services with duration, price/fee range, audience and a per-card enquiry CTA that pre-selects the course in the enquiry form.",
+  "implementationStatus": "contract-only",
+  "inputSchema": {
+    "type": "object",
+    "required": ["services"],
+    "properties": {
+      "services": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "required": ["name", "description"],
+          "properties": {
+            "name": { "type": "string" },
+            "description": { "type": "string" },
+            "duration": { "type": "string" },
+            "price": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "sectionId": { "const": "services" },
+      "courseOptions": { "type": "array", "items": { "type": "string" }, "description": "Names exposed to the enquiry-form course selector" }
+    }
+  },
+  "dependencies": ["business-landing-page"],
+  "supportedIntegrations": [],
+  "configurationFields": [
+    { "key": "services", "type": "array", "required": true, "description": "From website-copy.json services[]" },
+    { "key": "showPrices", "type": "boolean", "required": false, "default": true, "description": "Hide prices when the client prefers 'Contact us for fees'" },
+    { "key": "layout", "type": "enum(cards|table)", "required": false, "default": "cards", "description": "Card grid or comparison table" }
+  ],
+  "estimatedMonthlyCostUSD": 0,
+  "permissionsRequired": [],
+  "testCases": [
+    { "id": "SNP-01", "description": "Render three services from the sample intake", "expectedOutcome": "Three cards with name, duration and price exactly as supplied" },
+    { "id": "SNP-02", "description": "Click 'Enquire' on a card", "expectedOutcome": "Scrolls to the enquiry form with that course pre-selected" },
+    { "id": "SNP-03", "description": "Render with showPrices=false", "expectedOutcome": "No price text appears anywhere in the section" }
+  ],
+  "knownLimitations": [
+    "Contract only: Angular implementation not yet built (Phase B).",
+    "No online payment or checkout."
+  ],
+  "rollbackApproach": "Disable the module in site.config.json enabledModules and redeploy, or redeploy the previous build."
+}

@@ -1,0 +1,48 @@
+{
+  "id": "schedule-appointment",
+  "version": "0.1.0",
+  "category": "automation",
+  "purpose": "Turns a booking request into a calendar event within business hours, checks free/busy to avoid double booking, and links the appointment to the lead record.",
+  "implementationStatus": "contract-only",
+  "inputSchema": {
+    "type": "object",
+    "required": ["leadId", "tenantId", "requestedStart", "timezone"],
+    "properties": {
+      "leadId": { "type": "string" },
+      "tenantId": { "type": "string" },
+      "requestedStart": { "type": "string" },
+      "timezone": { "type": "string" }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "required": ["appointmentId", "status"],
+    "properties": {
+      "appointmentId": { "type": "string" },
+      "status": { "enum": ["confirmed", "pending-staff-confirmation", "rejected-conflict", "rejected-outside-hours"] },
+      "calendarEventId": { "type": "string" }
+    }
+  },
+  "dependencies": ["capture-and-store-lead"],
+  "supportedIntegrations": ["Google Calendar", "Calendly webhooks"],
+  "configurationFields": [
+    { "key": "calendarType", "type": "enum", "required": true, "description": "From intake booking_calendar_type" },
+    { "key": "calendarId", "type": "string", "required": false, "description": "Client's booking calendar id (not a secret)" },
+    { "key": "businessHours", "type": "string", "required": true, "description": "From intake business_hours" },
+    { "key": "timezone", "type": "IANA timezone", "required": true, "description": "e.g. Asia/Kolkata" },
+    { "key": "requireStaffConfirmation", "type": "boolean", "required": false, "default": true, "description": "Create tentative events until staff confirm" },
+    { "key": "calendarCredentialRef", "type": "credential-ref", "required": false, "description": "GCAL_OAUTH_REF" }
+  ],
+  "estimatedMonthlyCostUSD": 0,
+  "permissionsRequired": ["Read free/busy and create events on the client's booking calendar"],
+  "testCases": [
+    { "id": "SAP-01", "description": "Request a free slot inside business hours", "expectedOutcome": "Tentative event created; appointment linked to lead" },
+    { "id": "SAP-02", "description": "Request an already-busy slot", "expectedOutcome": "rejected-conflict; no event created" },
+    { "id": "SAP-03", "description": "Request outside business hours", "expectedOutcome": "rejected-outside-hours" }
+  ],
+  "knownLimitations": [
+    "Contract only: n8n blueprint JSON not yet built and exported (Phase B).",
+    "Microsoft 365 calendars are not supported yet."
+  ],
+  "rollbackApproach": "Deactivate the workflow; appointment requests remain on the lead record for manual scheduling."
+}

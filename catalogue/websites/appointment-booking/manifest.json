@@ -1,0 +1,54 @@
+{
+  "id": "appointment-booking",
+  "version": "0.1.0",
+  "category": "website",
+  "purpose": "Lets prospects pick a demo or counselling slot within business hours, either via an embedded Calendly/Google appointment page or a built-in slot request form.",
+  "implementationStatus": "contract-only",
+  "inputSchema": {
+    "type": "object",
+    "required": ["booking"],
+    "properties": {
+      "booking": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": { "enum": ["Google Calendar", "Calendly Link", "Built-in Slot Request", "Manual Follow-up Only"] },
+          "url": { "type": "string" },
+          "businessHours": { "type": "string" },
+          "timezone": { "type": "string" },
+          "slotMinutes": { "type": "integer" }
+        }
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "description": "Booking request event sent to schedule-appointment",
+    "properties": {
+      "leadId": { "type": "string" },
+      "requestedStart": { "type": "string" },
+      "timezone": { "type": "string" }
+    }
+  },
+  "dependencies": ["schedule-appointment"],
+  "supportedIntegrations": ["Google Calendar appointment schedules", "Calendly", "Built-in slot request"],
+  "configurationFields": [
+    { "key": "booking.type", "type": "enum", "required": true, "description": "Matches intake booking_calendar_type" },
+    { "key": "booking.url", "type": "url", "required": false, "description": "Required for Calendly Link / Google appointment page embeds" },
+    { "key": "booking.businessHours", "type": "string", "required": true, "description": "From intake business_hours" },
+    { "key": "booking.timezone", "type": "IANA timezone", "required": true, "description": "e.g. Asia/Kolkata" },
+    { "key": "booking.slotMinutes", "type": "integer", "required": false, "default": 30, "description": "Slot length for built-in requests" }
+  ],
+  "estimatedMonthlyCostUSD": 0,
+  "permissionsRequired": ["Read free/busy on the client's booking calendar (via schedule-appointment)"],
+  "testCases": [
+    { "id": "APB-01", "description": "Request a slot inside business hours", "expectedOutcome": "Request accepted and forwarded to schedule-appointment" },
+    { "id": "APB-02", "description": "Request a slot outside business hours or in the past", "expectedOutcome": "Rejected with a clear message" },
+    { "id": "APB-03", "description": "Calendly Link mode renders embed", "expectedOutcome": "Embed loads; no API calls made from the site" }
+  ],
+  "knownLimitations": [
+    "Contract only: Angular implementation not yet built (Phase B).",
+    "Built-in mode creates requests, not confirmed bookings; staff confirm in the calendar."
+  ],
+  "rollbackApproach": "Switch booking.type to 'Manual Follow-up Only' in site.config.json and redeploy."
+}

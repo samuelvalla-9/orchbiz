@@ -1,0 +1,43 @@
+{
+  "id": "lead-dashboard",
+  "version": "0.1.0",
+  "category": "website",
+  "purpose": "Authenticated client-facing view of enquiries, classification tags, follow-up drafts awaiting approval and booked appointments, scoped to a single tenant.",
+  "implementationStatus": "contract-only",
+  "inputSchema": {
+    "type": "object",
+    "required": ["tenantId", "apiBaseUrl"],
+    "properties": {
+      "tenantId": { "type": "string" },
+      "apiBaseUrl": { "type": "string" },
+      "staffUsers": { "type": "array", "items": { "type": "string", "description": "Staff email addresses" } }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "route": { "const": "/dashboard" },
+      "actions": { "type": "array", "items": { "enum": ["view-lead", "update-status", "approve-follow-up", "export-csv"] } }
+    }
+  },
+  "dependencies": ["capture-and-store-lead"],
+  "supportedIntegrations": ["OrchBiz lead API (Spring Boot)", "Google Sign-In / email magic link"],
+  "configurationFields": [
+    { "key": "api.tenantId", "type": "string", "required": true, "description": "Must equal the client slug" },
+    { "key": "api.baseUrl", "type": "string", "required": true, "description": "${API_BASE_URL} placeholder" },
+    { "key": "staffUsers", "type": "array", "required": true, "description": "Allow-list of staff logins" },
+    { "key": "authProviderRef", "type": "credential-ref", "required": true, "description": "DASHBOARD_AUTH_REF" }
+  ],
+  "estimatedMonthlyCostUSD": 0,
+  "permissionsRequired": ["Read/update leads for the configured tenant only"],
+  "testCases": [
+    { "id": "LDB-01", "description": "Staff user logs in and lists leads", "expectedOutcome": "Only leads with the configured tenant_id are returned" },
+    { "id": "LDB-02", "description": "Call the leads API with another tenant's id using a valid token", "expectedOutcome": "HTTP 403; no data returned" },
+    { "id": "LDB-03", "description": "Unauthenticated access to /dashboard", "expectedOutcome": "Redirected to login" }
+  ],
+  "knownLimitations": [
+    "Contract only: Angular + Spring Boot implementation not yet built (Phase B).",
+    "No role hierarchy; all allow-listed staff have equal access."
+  ],
+  "rollbackApproach": "Disable the dashboard route in config; leads remain accessible via Google Sheets sync or database export."
+}

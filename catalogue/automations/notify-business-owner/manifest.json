@@ -1,0 +1,46 @@
+{
+  "id": "notify-business-owner",
+  "version": "0.1.0",
+  "category": "automation",
+  "purpose": "Sends an instant internal alert to the client's staff when a new lead is captured, via email, an approved WhatsApp template, Telegram or Slack.",
+  "implementationStatus": "contract-only",
+  "inputSchema": {
+    "type": "object",
+    "required": ["leadId", "tenantId"],
+    "properties": {
+      "leadId": { "type": "string" },
+      "tenantId": { "type": "string" },
+      "classification": { "type": "object" }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "channelsAttempted": { "type": "array", "items": { "type": "string" } },
+      "delivered": { "type": "boolean" },
+      "mode": { "enum": ["dry-run", "staging", "live"] }
+    }
+  },
+  "dependencies": ["capture-and-store-lead"],
+  "supportedIntegrations": ["SMTP / Gmail", "WhatsApp Business Cloud API (approved template)", "Telegram Bot", "Slack Incoming Webhook"],
+  "configurationFields": [
+    { "key": "channels", "type": "array", "required": true, "description": "From intake notification_channels" },
+    { "key": "recipients", "type": "array", "required": true, "description": "From intake notification_recipients (staff only)" },
+    { "key": "mode", "type": "enum(dry-run|staging|live)", "required": true, "default": "dry-run", "description": "live only after Gate 2 and operator activation" },
+    { "key": "smtpCredentialRef", "type": "credential-ref", "required": false, "description": "SMTP_CREDENTIAL_REF" },
+    { "key": "whatsappCredentialRef", "type": "credential-ref", "required": false, "description": "WHATSAPP_API_REF" },
+    { "key": "whatsappTemplateName", "type": "string", "required": false, "description": "Pre-approved Meta template name" }
+  ],
+  "estimatedMonthlyCostUSD": 3,
+  "permissionsRequired": ["Send email from the configured mailbox", "Send WhatsApp template messages to staff numbers"],
+  "testCases": [
+    { "id": "NBO-01", "description": "lead.created event in dry-run mode", "expectedOutcome": "Message rendered and logged; nothing sent externally" },
+    { "id": "NBO-02", "description": "Staging mode with a test recipient", "expectedOutcome": "Exactly one message delivered to the test recipient" },
+    { "id": "NBO-03", "description": "Primary channel fails", "expectedOutcome": "Failure logged; email fallback attempted; workflow does not crash" }
+  ],
+  "knownLimitations": [
+    "Contract only: n8n blueprint JSON not yet built and exported (Phase B).",
+    "WhatsApp requires a client-owned Meta Business account and approved template; per-message fees apply."
+  ],
+  "rollbackApproach": "Set mode=dry-run or deactivate the workflow in n8n; alerts remain visible in the lead dashboard."
+}
