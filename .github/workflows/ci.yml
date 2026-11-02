@@ -1,0 +1,33 @@
+name: ci
+
+on:
+  push:
+    branches: [main, "GH-*"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: OrchBiz CLI - build and test
+        run: mvn -B -f tools/orchbiz-cli/pom.xml package
+
+      - name: Lead API - build and test
+        run: mvn -B -f platform/lead-api/pom.xml package
+
+      - name: Validate catalogue (manifests, packages, implementation pointers, n8n blueprints)
+        run: java -jar tools/orchbiz-cli/target/orchbiz-cli.jar validate-catalogue
+
+      - name: Scan repository for secrets
+        run: java -jar tools/orchbiz-cli/target/orchbiz-cli.jar scan-secrets .
