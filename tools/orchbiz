@@ -1,0 +1,12 @@
+#!/bin/sh
+# Runs the OrchBiz CLI from Git Bash / POSIX shells, building it with Maven if the jar is missing.
+set -e
+TOOLS_DIR=$(cd "$(dirname "$0")" && pwd)
+ROOT=$(dirname "$TOOLS_DIR")
+JAR="$TOOLS_DIR/orchbiz-cli/target/orchbiz-cli.jar"
+if [ ! -f "$JAR" ]; then
+  echo "Building orchbiz-cli..." >&2
+  mvn -q -B -f "$TOOLS_DIR/orchbiz-cli/pom.xml" package -DskipTests >&2
+fi
+cd "$ROOT"
+exec java -jar "$JAR" "$@"

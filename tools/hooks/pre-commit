@@ -1,0 +1,36 @@
+#!/bin/sh
+# OrchBiz pre-commit hook. Install once per clone:
+#   git config core.hooksPath tools/hooks
+# 1) Blocks staged client engagement data (clients/<slug>/...), allowing only clients/README.md and clients/_template/.
+# 2) Runs the OrchBiz secret scanner on staged files.
+
+blocked=$(git diff --cached --name-only --diff-filter=ACMR | grep '^clients/' | grep -v -e '^clients/README\.md$' -e '^clients/_template/')
+if [ -n "$blocked" ]; then
+  echo "pre-commit: refusing to commit client engagement data:" >&2
+  echo "$blocked" | sed 's/^/  /' >&2
+  echo "Unstage with: git restore --staged <path>" >&2
+  exit 1
+fi
+
+ROOT=$(git rev-parse --show-toplevel)
+JAR="$ROOT/tools/orchbiz-cli/target/orchbiz-cli.jar"
+if [ ! -f "$JAR" ]; then
+  echo "pre-commit: building orchbiz-cli for secret scanning..." >&2
+  mvn -q -B -f "$ROOT/tools/orchbiz-cli/pom.xml" package -DskipTests >&2 || {
+    echo "pre-commit: could not build orchbiz-cli; secret scan not run. Fix the build or commit with --no-verify after a manual review." >&2
+    exit 1
+  }
+fi
+
+(cd "$ROOT" && java -jar "$JAR" scan-secrets --staged)
+status=$?
+if [ $status -eq 1 ]; then
+  echo "pre-commit: possible secrets found in staged files (see above). Replace them with *_REF credential references or \${ENV_VAR} placeholders." >&2
+  echo "If a line is a documented, fake example, append the marker 'orchbiz:allow-secret' to that line." >&2
+  exit 1
+fi
+if [ $status -ne 0 ]; then
+  echo "pre-commit: secret scan failed to run (exit $status)." >&2
+  exit 1
+fi
+exit 0
