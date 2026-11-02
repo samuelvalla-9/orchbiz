@@ -507,6 +507,7 @@ public final class Commands {
                     if (manifests.put(id, m) != null) {
                         errors.add(rel + ": duplicate module id '" + id + "'.");
                     }
+                    checkImplementations(ws, rel, m, errors);
                     if (e.isEmpty()) {
                         out().println("OK    " + rel + " (" + id + " v" + m.path("version").asText() + ", "
                                 + m.path("implementationStatus").asText("unspecified") + ")");
@@ -567,6 +568,86 @@ public final class Commands {
                 }
             }
             return report(errors, warnings, manifests.size() + " module manifest(s) and all packages are valid");
+        }
+
+        static final java.util.regex.Pattern CREDENTIAL_REF = java.util.regex.Pattern.compile("^[A-Z][A-Z0-9_]*_REF$");
+
+        /** Implementation pointers must exist; n8n blueprints must be importable, inactive and credential-by-reference. */
+        static void checkImplementations(Workspace ws, String rel, JsonNode manifest, List<String> errors) throws IOException {
+            String status = manifest.path("implementationStatus").asText("contract-only");
+            if (!"contract-only".equals(status) && manifest.path("implementation").isEmpty()) {
+                errors.add(rel + ": implementationStatus '" + status + "' requires at least one implementation entry.");
+            }
+            for (JsonNode impl : manifest.path("implementation")) {
+                String path = impl.path("path").asText();
+                Path target = ws.root().resolve(path).normalize();
+                if (!target.startsWith(ws.root()) || path.contains("..")) {
+                    errors.add(rel + ": implementation path '" + path + "' must stay inside the workspace.");
+                    continue;
+                }
+                if (!Files.exists(target)) {
+                    errors.add(rel + ": implementation path '" + path + "' does not exist.");
+                    continue;
+                }
+                if ("n8n-workflow".equals(impl.path("kind").asText())) {
+                    if (!Files.isRegularFile(target) || !path.endsWith(".workflow.json")) {
+                        errors.add(rel + ": n8n-workflow path '" + path + "' must be a *.workflow.json file.");
+                        continue;
+                    }
+                    checkN8nBlueprint(path, Workspace.readJson(target), errors);
+                }
+            }
+        }
+
+        static void checkN8nBlueprint(String rel, JsonNode wf, List<String> errors) {
+            JsonNode nodes = wf.path("nodes");
+            if (!nodes.isArray() || nodes.isEmpty()) {
+                errors.add(rel + ": blueprint must contain a non-empty 'nodes' array.");
+                return;
+            }
+            if (!wf.path("connections").isObject()) {
+                errors.add(rel + ": blueprint must contain a 'connections' object.");
+            }
+            if (wf.path("active").asBoolean(false)) {
+                errors.add(rel + ": blueprint must be exported with active=false; activation is an operator action.");
+            }
+            Set<String> names = new LinkedHashSet<>();
+            for (JsonNode n : nodes) {
+                String name = n.path("name").asText();
+                if (name.isBlank() || n.path("type").asText().isBlank()) {
+                    errors.add(rel + ": every node needs a name and a type.");
+                }
+                if (!names.add(name)) {
+                    errors.add(rel + ": duplicate node name '" + name + "'.");
+                }
+                var creds = n.path("credentials").fields();
+                while (creds.hasNext()) {
+                    var c = creds.next();
+                    String credName = c.getValue().path("name").asText();
+                    if (!CREDENTIAL_REF.matcher(credName).matches()) {
+                        errors.add(rel + ": node '" + name + "' credential '" + c.getKey()
+                                + "' must be referenced by a *_REF name, not '" + credName + "'.");
+                    }
+                    if (!c.getValue().path("id").asText("").isEmpty()) {
+                        errors.add(rel + ": node '" + name + "' credential '" + c.getKey()
+                                + "' must not carry an instance-specific id.");
+                    }
+                }
+            }
+            var conns = wf.path("connections").fields();
+            while (conns.hasNext()) {
+                var c = conns.next();
+                if (!names.contains(c.getKey())) {
+                    errors.add(rel + ": connection from unknown node '" + c.getKey() + "'.");
+                }
+                for (JsonNode output : c.getValue().path("main")) {
+                    for (JsonNode link : output) {
+                        if (!names.contains(link.path("node").asText())) {
+                            errors.add(rel + ": connection to unknown node '" + link.path("node").asText() + "'.");
+                        }
+                    }
+                }
+            }
         }
     }
 }

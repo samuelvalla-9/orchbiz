@@ -32,7 +32,7 @@ class OrchbizCliTest {
 
     @BeforeEach
     void copyWorkspace() throws IOException {
-        for (String dir : List.of("intake", "catalogue", "schemas", "clients/_template")) {
+        for (String dir : List.of("intake", "catalogue", "schemas", "clients/_template", "platform")) {
             copyTree(REPO.resolve(dir), tmp.resolve(dir));
         }
     }
@@ -127,6 +127,35 @@ class OrchbizCliTest {
         Workspace.writeJson(mf, node);
         assertEquals(1, run("validate-catalogue"));
         assertTrue(lastOut.contains("does-not-exist"), lastOut);
+    }
+
+    @Test
+    void catalogueChecksImplementationPointersAndBlueprints() throws IOException {
+        Path wf = tmp.resolve("catalogue/automations/notify-business-owner/notify-business-owner.workflow.json");
+        ObjectNode bp = (ObjectNode) Workspace.readJson(wf);
+        bp.put("active", true);
+        ObjectNode webhook = (ObjectNode) bp.get("nodes").get(0);
+        ((ObjectNode) webhook.get("credentials").get("httpHeaderAuth")).put("name", "my real header").put("id", "42");
+        ((ObjectNode) bp.get("connections")).putObject("Ghost").putArray("main").addArray()
+                .addObject().put("node", "Nowhere").put("type", "main").put("index", 0);
+        Workspace.writeJson(wf, bp);
+
+        Path mf = tmp.resolve("catalogue/automations/capture-and-store-lead/manifest.json");
+        ObjectNode csl = (ObjectNode) Workspace.readJson(mf);
+        ((ObjectNode) csl.get("implementation").get(0)).put("path", "platform/missing-service");
+        Workspace.writeJson(mf, csl);
+
+        Path enq = tmp.resolve("catalogue/websites/enquiry-form/manifest.json");
+        ObjectNode e = (ObjectNode) Workspace.readJson(enq);
+        e.put("implementationStatus", "tested");
+        Workspace.writeJson(enq, e);
+
+        assertEquals(1, run("validate-catalogue"));
+        for (String expected : List.of("active=false", "*_REF name", "instance-specific id", "unknown node 'Ghost'",
+                "unknown node 'Nowhere'", "'platform/missing-service' does not exist",
+                "'tested' requires at least one implementation entry")) {
+            assertTrue(lastOut.contains(expected), expected + "\n" + lastOut);
+        }
     }
 
     @Test
@@ -240,7 +269,7 @@ class OrchbizCliTest {
 
     private static void copyTree(Path src, Path dst) throws IOException {
         try (Stream<Path> s = Files.walk(src)) {
-            for (Path p : s.toList()) {
+            for (Path p : s.filter(p -> !src.relativize(p).toString().replace('\\', '/').matches("(.*/)?target(/.*)?")).toList()) {
                 Path target = dst.resolve(src.relativize(p).toString());
                 if (Files.isDirectory(p)) {
                     Files.createDirectories(target);

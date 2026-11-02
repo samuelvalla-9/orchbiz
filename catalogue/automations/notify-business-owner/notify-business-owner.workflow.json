@@ -1,0 +1,102 @@
+{
+  "name": "OrchBiz - notify-business-owner (lead.created)",
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "tags": [],
+  "meta": { "orchbizModule": "notify-business-owner", "orchbizVersion": "0.2.0", "status": "untested-blueprint" },
+  "nodes": [
+    {
+      "id": "8f0c2c1e-0001-4a51-9a10-000000000001",
+      "name": "Lead event webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "orchbiz-lead-events",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "orchbiz/lead-events",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": { "name": "LEAD_EVENTS_WEBHOOK_HEADER_REF" }
+      }
+    },
+    {
+      "id": "8f0c2c1e-0002-4a51-9a10-000000000002",
+      "name": "Validate and render",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 0],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// OrchBiz notify-business-owner. Modes: 'dry-run' (render + log only) or 'staging' (email the staging inbox only).\n// Live delivery to client staff is an operator change made only after Gate 2 approval.\nconst CONFIG = {\n  mode: 'dry-run',\n  stagingRecipient: 'staging-inbox@example.com',\n  fromAddress: 'orchbiz-staging@example.com'\n};\nconst mode = CONFIG.mode === 'staging' ? 'staging' : 'dry-run';\nconst state = $getWorkflowStaticData('global');\nstate.eventIds = state.eventIds || [];\nconst out = [];\nfor (const item of $input.all()) {\n  const body = item.json.body || {};\n  const problems = [];\n  if (body.event !== 'lead.created') problems.push('unexpected event type: ' + body.event);\n  for (const k of ['eventId', 'tenantId', 'leadId']) {\n    if (!body[k]) problems.push('missing ' + k);\n  }\n  if (problems.length) {\n    out.push({ json: { action: 'rejected', mode, problems } });\n    continue;\n  }\n  if (state.eventIds.includes(body.eventId)) {\n    out.push({ json: { action: 'duplicate-ignored', mode, eventId: body.eventId } });\n    continue;\n  }\n  state.eventIds.push(body.eventId);\n  if (state.eventIds.length > 500) state.eventIds.splice(0, state.eventIds.length - 500);\n  const lead = body.lead || {};\n  const fields = lead.fields || {};\n  const lines = Object.entries(fields).map(([k, v]) => k + ': ' + (Array.isArray(v) ? v.join(', ') : v));\n  const subject = 'New enquiry for ' + (body.tenantName || body.tenantId);\n  const text = [\n    'A new enquiry was received.',\n    '',\n    ...lines,\n    '',\n    'Page: ' + (lead.sourcePage || 'unknown'),\n    'Received: ' + (lead.receivedAt || body.occurredAt),\n    'Lead ID: ' + body.leadId,\n    mode === 'staging' ? '[STAGING - test recipient only]' : ''\n  ].join('\\n');\n  out.push({ json: {\n    action: mode === 'staging' ? 'send' : 'log-only',\n    mode,\n    eventId: body.eventId,\n    tenantId: body.tenantId,\n    leadId: body.leadId,\n    from: CONFIG.fromAddress,\n    to: mode === 'staging' ? CONFIG.stagingRecipient : null,\n    subject,\n    text\n  } });\n}\nreturn out;"
+      }
+    },
+    {
+      "id": "8f0c2c1e-0003-4a51-9a10-000000000003",
+      "name": "Send in staging?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [480, 0],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "a7d8f1d2-0000-4c3b-8d5e-000000000001",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "send",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "8f0c2c1e-0004-4a51-9a10-000000000004",
+      "name": "Email staging inbox",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [720, -100],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "fromEmail": "={{ $json.from }}",
+        "toEmail": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "text",
+        "text": "={{ $json.text }}",
+        "options": {}
+      },
+      "credentials": {
+        "smtp": { "name": "SMTP_CREDENTIAL_REF" }
+      }
+    },
+    {
+      "id": "8f0c2c1e-0005-4a51-9a10-000000000005",
+      "name": "Dry-run or ignored (logged only)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [720, 100],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Lead event webhook": {
+      "main": [[{ "node": "Validate and render", "type": "main", "index": 0 }]]
+    },
+    "Validate and render": {
+      "main": [[{ "node": "Send in staging?", "type": "main", "index": 0 }]]
+    },
+    "Send in staging?": {
+      "main": [
+        [{ "node": "Email staging inbox", "type": "main", "index": 0 }],
+        [{ "node": "Dry-run or ignored (logged only)", "type": "main", "index": 0 }]
+      ]
+    }
+  }
+}

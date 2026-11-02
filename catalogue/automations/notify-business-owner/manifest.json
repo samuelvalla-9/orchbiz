@@ -1,9 +1,12 @@
 {
   "id": "notify-business-owner",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "automation",
   "purpose": "Sends an instant internal alert to the client's staff when a new lead is captured, via email, an approved WhatsApp template, Telegram or Slack.",
-  "implementationStatus": "contract-only",
+  "implementationStatus": "in-development",
+  "implementation": [
+    { "kind": "n8n-workflow", "path": "catalogue/automations/notify-business-owner/notify-business-owner.workflow.json", "verifiedBy": "untested: structure checked by validate-catalogue; not yet imported into a running n8n instance" }
+  ],
   "inputSchema": {
     "type": "object",
     "required": ["leadId", "tenantId"],
@@ -27,6 +30,8 @@
     { "key": "channels", "type": "array", "required": true, "description": "From intake notification_channels" },
     { "key": "recipients", "type": "array", "required": true, "description": "From intake notification_recipients (staff only)" },
     { "key": "mode", "type": "enum(dry-run|staging|live)", "required": true, "default": "dry-run", "description": "live only after Gate 2 and operator activation" },
+    { "key": "webhookHeaderCredentialRef", "type": "credential-ref", "required": true, "description": "LEAD_EVENTS_WEBHOOK_HEADER_REF: n8n Header Auth credential (X-OrchBiz-Token) matching the lead API's LEAD_EVENTS_WEBHOOK_TOKEN" },
+    { "key": "stagingRecipient", "type": "string", "required": false, "description": "Operator-owned test inbox used in staging mode; never a client contact" },
     { "key": "smtpCredentialRef", "type": "credential-ref", "required": false, "description": "SMTP_CREDENTIAL_REF" },
     { "key": "whatsappCredentialRef", "type": "credential-ref", "required": false, "description": "WHATSAPP_API_REF" },
     { "key": "whatsappTemplateName", "type": "string", "required": false, "description": "Pre-approved Meta template name" }
@@ -39,7 +44,9 @@
     { "id": "NBO-03", "description": "Primary channel fails", "expectedOutcome": "Failure logged; email fallback attempted; workflow does not crash" }
   ],
   "knownLimitations": [
-    "Contract only: n8n blueprint JSON not yet built and exported (Phase B).",
+    "Blueprint implements email only, in dry-run and staging modes; WhatsApp, Telegram and Slack channels and live per-tenant recipients are not built yet.",
+    "NBO-03 fallback is partial: an email failure is caught and logged, but there is no second channel yet.",
+    "Mode and staging recipient are constants in the 'Validate and render' node; edit them after import.",
     "WhatsApp requires a client-owned Meta Business account and approved template; per-message fees apply."
   ],
   "rollbackApproach": "Set mode=dry-run or deactivate the workflow in n8n; alerts remain visible in the lead dashboard."

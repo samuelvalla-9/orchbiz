@@ -1,9 +1,12 @@
 {
   "id": "capture-and-store-lead",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "automation",
-  "purpose": "n8n webhook workflow that validates an enquiry payload, normalises phone/email, deduplicates by tenant + contact, persists the lead and emits a lead.created event.",
-  "implementationStatus": "contract-only",
+  "purpose": "Lead API (platform/lead-api) that validates an enquiry payload against the tenant's form config, normalises phone/email, deduplicates by tenant + contact, persists the lead in PostgreSQL and emits a lead.created event to n8n via an outbox.",
+  "implementationStatus": "in-development",
+  "implementation": [
+    { "kind": "service", "path": "platform/lead-api", "verifiedBy": "mvn package: LeadApiTest and EventDispatcherTest cover CSL-01..04 on H2 (PostgreSQL mode); not yet run against real PostgreSQL" }
+  ],
   "inputSchema": {
     "type": "object",
     "required": ["tenantId", "submittedAt", "fields"],
@@ -27,8 +30,9 @@
   "dependencies": [],
   "supportedIntegrations": ["PostgreSQL", "Google Sheets", "Airtable"],
   "configurationFields": [
-    { "key": "webhookPath", "type": "string", "required": true, "default": "/webhook/<tenant>/lead", "description": "n8n webhook path, unique per tenant" },
-    { "key": "requiredFields", "type": "array", "required": true, "description": "Mapped from intake enquiry_fields" },
+    { "key": "leadApiUrl", "type": "string", "required": true, "default": "https://<api-host>/api/leads", "description": "Lead API endpoint the enquiry form posts to; the tenant is identified by tenantId in the payload" },
+    { "key": "allowedOrigins", "type": "array", "required": true, "description": "Website origins allowed to POST (ORCHBIZ_ALLOWED_ORIGINS)" },
+    { "key": "requiredFields", "type": "array", "required": true, "description": "Mapped from intake enquiry_fields; set via PUT /api/admin/tenants/{tenantId}" },
     { "key": "dedupeWindowHours", "type": "integer", "required": false, "default": 24, "description": "Same contact within window updates the existing lead" },
     { "key": "storageTargets", "type": "array", "required": true, "description": "From intake lead_storage_target" },
     { "key": "postgresCredentialRef", "type": "credential-ref", "required": true, "description": "POSTGRES_CREDENTIAL_REF" },
@@ -37,14 +41,16 @@
   "estimatedMonthlyCostUSD": 0,
   "permissionsRequired": ["Insert/update on the tenant's leads table", "Append rows to the client's lead sheet (if selected)"],
   "testCases": [
-    { "id": "CSL-01", "description": "POST a valid payload", "expectedOutcome": "200 with leadId; one row in leads with tenant_id set" },
-    { "id": "CSL-02", "description": "POST the same contact twice within the dedupe window", "expectedOutcome": "Second response duplicate=true; still one lead row" },
+    { "id": "CSL-01", "description": "POST a valid payload", "expectedOutcome": "201 with leadId; one row in leads with tenant_id set; one PENDING lead.created event" },
+    { "id": "CSL-02", "description": "POST the same contact twice within the dedupe window", "expectedOutcome": "Second response 200 duplicate=true; still one lead row; no second event" },
     { "id": "CSL-03", "description": "POST a payload missing a required field", "expectedOutcome": "400; nothing stored; no downstream events" },
-    { "id": "CSL-04", "description": "POST with a tenantId that does not match the webhook path", "expectedOutcome": "403; nothing stored" }
+    { "id": "CSL-04", "description": "POST with an unknown or inactive tenantId", "expectedOutcome": "403; nothing stored" }
   ],
   "knownLimitations": [
-    "Contract only: n8n blueprint JSON not yet built and exported (Phase B).",
+    "Only PostgreSQL storage is implemented; Google Sheets and Airtable targets are not built yet.",
+    "Event delivery is at-least-once and assumes a single API instance; receivers de-duplicate on eventId.",
+    "No built-in rate limiting; deploy behind a reverse proxy/WAF with rate limits.",
     "Sheets sync is append-only."
   ],
-  "rollbackApproach": "Deactivate the workflow in n8n and re-import the previous exported version; the form falls back to the API's own persistence."
+  "rollbackApproach": "Redeploy the previous lead-api image; Flyway migrations are additive. Leads already stored remain in PostgreSQL."
 }

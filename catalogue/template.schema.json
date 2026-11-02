@@ -99,6 +99,20 @@
       "type": "string",
       "enum": ["contract-only", "in-development", "tested"],
       "description": "contract-only: manifest exists but no tested implementation; agents must label generated configuration as drafts. tested: implementation and test cases pass in CI."
+    },
+    "implementation": {
+      "type": "array",
+      "description": "Where the reusable implementation lives. Paths are relative to the workspace root and are checked by validate-catalogue.",
+      "items": {
+        "type": "object",
+        "required": ["kind", "path"],
+        "properties": {
+          "kind": { "type": "string", "enum": ["service", "n8n-workflow", "angular-component"] },
+          "path": { "type": "string", "pattern": "^[A-Za-z0-9._/-]+$" },
+          "verifiedBy": { "type": "string", "description": "How this implementation is tested, or 'untested' with the reason" }
+        },
+        "additionalProperties": false
+      }
     }
   },
   "additionalProperties": false
