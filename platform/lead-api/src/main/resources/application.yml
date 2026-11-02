@@ -1,0 +1,43 @@
+# All secrets come from environment variables. Never put real values in this file.
+server:
+  port: ${PORT:8080}
+  error:
+    include-message: never
+    include-stacktrace: never
+
+spring:
+  application:
+    name: orchbiz-lead-api
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/orchbiz}
+    username: ${DB_USERNAME:orchbiz}
+    password: ${DB_PASSWORD:}
+  flyway:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+orchbiz:
+  # Bearer token for /api/admin/**. Admin endpoints return 503 while this is empty.
+  admin-token: ${ORCHBIZ_ADMIN_TOKEN:}
+  # Hidden form field used as a spam trap; submissions that fill it are discarded.
+  honeypot-field: ${ORCHBIZ_HONEYPOT_FIELD:_hp}
+  cors:
+    # Comma-separated website origins allowed to POST /api/leads, e.g. https://www.client.example
+    allowed-origins: ${ORCHBIZ_ALLOWED_ORIGINS:}
+  events:
+    # n8n webhook that receives lead.created events. Events stay PENDING while this is empty.
+    webhook-url: ${LEAD_EVENTS_WEBHOOK_URL:}
+    # Sent as the X-OrchBiz-Token header; must match the n8n Header Auth credential.
+    webhook-token: ${LEAD_EVENTS_WEBHOOK_TOKEN:}
+    dispatch-interval-ms: ${LEAD_EVENTS_DISPATCH_INTERVAL_MS:5000}
+    max-attempts: ${LEAD_EVENTS_MAX_ATTEMPTS:5}
+    scheduling-enabled: true
