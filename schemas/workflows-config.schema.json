@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://orchbiz.local/schemas/workflows-config.schema.json",
+  "title": "OrchBiz Workflows Configuration",
+  "description": "clients/<client-slug>/deliverables/automations/workflows-config.json - produced by the Workflow Engineer (Stage 3C).",
+  "type": "object",
+  "required": ["clientSlug", "mode", "envTemplate", "testPlan", "workflows"],
+  "properties": {
+    "clientSlug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "mode": {
+      "description": "Stage 3 output must never be live. Live activation is an operator action after Gate 2.",
+      "enum": ["dry-run", "staging"]
+    },
+    "envTemplate": { "const": "env.template" },
+    "testPlan": { "const": "workflow-test-plan.md" },
+    "workflows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["moduleId", "blueprintVersion", "workflowFile", "trigger", "parameters", "credentialRefs", "externalMessaging"],
+        "properties": {
+          "moduleId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "blueprintVersion": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+          "workflowFile": { "type": "string", "pattern": "\\.workflow\\.json$" },
+          "derivedFromTestedBlueprint": {
+            "type": "boolean",
+            "description": "false when the catalogue blueprint is contract-only and the workflow JSON was drafted by the agent."
+          },
+          "trigger": {
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+              "type": { "enum": ["webhook", "schedule", "event", "manual"] },
+              "path": { "type": "string", "pattern": "^/" },
+              "cron": { "type": "string" },
+              "event": { "type": "string" }
+            },
+            "additionalProperties": false
+          },
+          "parameters": { "type": "object" },
+          "credentialRefs": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*_REF$" },
+            "uniqueItems": true
+          },
+          "externalMessaging": { "enum": ["none", "draft-only", "dry-run", "staging-recipients-only"] }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

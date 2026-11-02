@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://orchbiz.local/schemas/site-config.schema.json",
+  "title": "OrchBiz Site Configuration",
+  "description": "clients/<client-slug>/deliverables/website/site.config.json - produced by the Website Builder (Stage 3B); consumed by the website template.",
+  "type": "object",
+  "required": ["clientSlug", "enabledModules", "theme", "enquiryForm", "booking", "api", "contentSource"],
+  "properties": {
+    "clientSlug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "enabledModules": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "required": ["id", "version"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "theme": {
+      "type": "object",
+      "required": ["primaryColor", "secondaryColor"],
+      "properties": {
+        "primaryColor": { "$ref": "#/$defs/hex" },
+        "secondaryColor": { "$ref": "#/$defs/hex" },
+        "neutralColor": { "$ref": "#/$defs/hex" },
+        "backgroundColor": { "$ref": "#/$defs/hex" },
+        "headingFont": { "type": "string" },
+        "bodyFont": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "assets": {
+      "type": "object",
+      "properties": {
+        "logoUrl": { "type": "string" },
+        "assetFolderUrl": { "type": "string" },
+        "usesPlaceholders": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "contentSource": {
+      "type": "string",
+      "description": "Relative path to website-copy.json used to render page text.",
+      "const": "../content/website-copy.json"
+    },
+    "enquiryForm": {
+      "type": "object",
+      "required": ["fields", "submitEndpoint"],
+      "properties": {
+        "submitEndpoint": { "type": "string", "pattern": "^(/|\\$\\{)" },
+        "consentText": { "type": "string" },
+        "fields": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": ["name", "label", "type", "required", "validation"],
+            "properties": {
+              "name": { "type": "string", "pattern": "^[a-zA-Z][a-zA-Z0-9]*$" },
+              "label": { "type": "string" },
+              "type": { "enum": ["text", "email", "tel", "select", "textarea", "date", "checkbox"] },
+              "required": { "type": "boolean" },
+              "options": { "type": "array", "items": { "type": "string" } },
+              "validation": {
+                "type": "object",
+                "description": "Applied both client-side and server-side.",
+                "properties": {
+                  "minLength": { "type": "integer", "minimum": 0 },
+                  "maxLength": { "type": "integer", "minimum": 1 },
+                  "pattern": { "type": "string" }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false,
+            "if": { "properties": { "type": { "const": "select" } } },
+            "then": { "required": ["options"] }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "booking": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["Google Calendar", "Calendly Link", "Built-in Slot Request", "Manual Follow-up Only"] },
+        "url": { "type": "string" },
+        "businessHours": { "type": "string" },
+        "timezone": { "type": "string" },
+        "slotMinutes": { "type": "integer", "minimum": 5 }
+      },
+      "additionalProperties": false
+    },
+    "api": {
+      "type": "object",
+      "required": ["baseUrl", "tenantId"],
+      "properties": {
+        "baseUrl": { "type": "string", "description": "Use an environment placeholder such as ${API_BASE_URL}." },
+        "tenantId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "leadWebhookPath": { "type": "string", "pattern": "^/" }
+      },
+      "additionalProperties": false
+    },
+    "seo": { "type": "object" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "hex": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
+  }
+}

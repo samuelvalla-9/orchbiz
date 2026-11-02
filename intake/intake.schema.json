@@ -26,8 +26,10 @@
     "business_hours",
     "lead_storage_target",
     "hosting_preference",
-    "setup_budget_limit",
-    "monthly_ops_budget",
+    "setup_budget_amount",
+    "setup_budget_currency",
+    "monthly_ops_budget_amount",
+    "monthly_ops_budget_currency",
     "target_launch_date",
     "ai_data_consent"
   ],
@@ -111,8 +113,12 @@
       "type": "string",
       "enum": ["Client-Owned Cloud Account", "Operator-Managed Hosting", "Decide Later"]
     },
-    "setup_budget_limit": { "type": "string" },
-    "monthly_ops_budget": { "type": "string" },
+    "setup_budget_limit": { "type": "string", "description": "Legacy free-text setup budget, e.g. 'INR 45000'. Parsed into setup_budget_amount/currency when those are absent." },
+    "setup_budget_amount": { "type": "number", "minimum": 0, "description": "Agreed setup / implementation budget amount" },
+    "setup_budget_currency": { "type": "string", "pattern": "^[A-Z]{3}$", "description": "ISO 4217 currency code, e.g. INR, USD" },
+    "monthly_ops_budget": { "type": "string", "description": "Legacy free-text monthly budget, e.g. 'INR 2500/month'. Parsed into monthly_ops_budget_amount/currency when those are absent." },
+    "monthly_ops_budget_amount": { "type": "number", "minimum": 0, "description": "Maximum monthly third-party tool / hosting budget amount" },
+    "monthly_ops_budget_currency": { "type": "string", "pattern": "^[A-Z]{3}$", "description": "ISO 4217 currency code; converted with catalogue/fx-rates.json" },
     "target_launch_date": { "type": "string" },
     "ai_data_consent": {
       "type": "boolean",

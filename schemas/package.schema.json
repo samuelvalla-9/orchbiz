@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://orchbiz.local/schemas/package.schema.json",
+  "title": "OrchBiz Package Definition",
+  "description": "A sellable bundle of catalogue modules (catalogue/packages/<packageId>.json).",
+  "type": "object",
+  "required": [
+    "packageId",
+    "version",
+    "name",
+    "targetNiche",
+    "description",
+    "includedWebsiteModules",
+    "includedAutomationModules",
+    "defaultTechStack",
+    "baseInfrastructure",
+    "guardrails"
+  ],
+  "properties": {
+    "packageId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "name": { "type": "string", "minLength": 3 },
+    "targetNiche": { "type": "string" },
+    "description": { "type": "string", "minLength": 15 },
+    "includedWebsiteModules": { "$ref": "#/$defs/moduleList" },
+    "optionalAddOnWebsiteModules": { "$ref": "#/$defs/moduleList" },
+    "includedAutomationModules": { "$ref": "#/$defs/moduleList" },
+    "optionalAddOnAutomationModules": { "$ref": "#/$defs/moduleList" },
+    "defaultTechStack": { "type": "object", "additionalProperties": { "type": "string" } },
+    "baseInfrastructure": {
+      "type": "object",
+      "required": ["estimatedMonthlyCostUSD", "assumptions"],
+      "properties": {
+        "estimatedMonthlyCostUSD": { "type": "number", "minimum": 0 },
+        "operatorReviewRequired": { "type": "boolean" },
+        "assumptions": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      },
+      "additionalProperties": false
+    },
+    "guardrails": {
+      "type": "object",
+      "required": ["maxRevisionRounds", "requiresExplicitApprovalFor"],
+      "properties": {
+        "maxRevisionRounds": { "type": "integer", "minimum": 0 },
+        "requiresExplicitApprovalFor": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "moduleList": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+      "uniqueItems": true
+    }
+  }
+}

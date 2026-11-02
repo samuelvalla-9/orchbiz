@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://orchbiz.local/schemas/state.schema.json",
+  "title": "OrchBiz Client Engagement State",
+  "description": "clients/<client-slug>/state.json - lifecycle status, stage progress, human approvals and audit trail.",
+  "type": "object",
+  "required": ["clientSlug", "businessName", "selectedPackage", "status", "createdAt", "updatedAt", "stages", "approvals", "auditLog"],
+  "properties": {
+    "clientSlug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "businessName": { "type": "string", "minLength": 1 },
+    "selectedPackage": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "status": {
+      "description": "Overall engagement status. See docs/agent-workflow.md section 3 for the meaning of each value.",
+      "enum": [
+        "INTAKE_PENDING",
+        "INTAKE_RECEIVED",
+        "AWAITING_CLIENT_CLARIFICATION",
+        "REQUIREMENTS_ANALYZED",
+        "AWAITING_GATE1_APPROVAL",
+        "GATE1_APPROVED",
+        "DELIVERABLES_IN_PROGRESS",
+        "DELIVERABLES_GENERATED",
+        "QA_IN_PROGRESS",
+        "QA_FAILED",
+        "AWAITING_GATE2_APPROVAL",
+        "GATE2_APPROVED",
+        "HANDOVER_READY",
+        "COMPLETED",
+        "ON_HOLD",
+        "CANCELLED"
+      ]
+    },
+    "createdAt": { "type": "string", "minLength": 10 },
+    "updatedAt": { "type": "string", "minLength": 10 },
+    "stages": {
+      "type": "object",
+      "required": [
+        "01_business_analyst",
+        "02_solution_architect",
+        "03_brand_and_content",
+        "04_website_builder",
+        "05_workflow_engineer",
+        "06_qa_and_security",
+        "07_deployment_and_handover"
+      ],
+      "additionalProperties": { "$ref": "#/$defs/stage" }
+    },
+    "approvals": {
+      "type": "object",
+      "required": ["gate1_scope_and_architecture", "gate2_release_and_deploy"],
+      "properties": {
+        "gate1_scope_and_architecture": { "$ref": "#/$defs/approval" },
+        "gate2_release_and_deploy": { "$ref": "#/$defs/approval" }
+      },
+      "additionalProperties": false
+    },
+    "auditLog": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["timestamp", "actor", "action"],
+        "properties": {
+          "timestamp": { "type": "string", "minLength": 10 },
+          "actor": { "type": "string", "minLength": 1 },
+          "action": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
+          "details": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "stage": {
+      "type": "object",
+      "required": ["status", "outputPath"],
+      "properties": {
+        "status": { "enum": ["PENDING", "IN_PROGRESS", "COMPLETED", "BLOCKED", "FAILED", "SKIPPED"] },
+        "outputPath": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "approval": {
+      "type": "object",
+      "required": ["required", "approved", "approvedBy", "approvedAt"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "approved": { "type": "boolean" },
+        "approvedBy": { "type": ["string", "null"] },
+        "approvedAt": { "type": ["string", "null"] },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false,
+      "if": { "properties": { "approved": { "const": true } } },
+      "then": {
+        "properties": {
+          "approvedBy": { "type": "string", "minLength": 1 },
+          "approvedAt": { "type": "string", "minLength": 10 }
+        }
+      }
+    }
+  }
+}

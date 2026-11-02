@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://orchbiz.local/schemas/architecture-plan.schema.json",
+  "title": "OrchBiz Architecture Plan",
+  "description": "clients/<client-slug>/spec/architecture-plan.json - produced by the Solution Architect (Stage 2) for Gate 1 review.",
+  "type": "object",
+  "required": ["clientSlug", "packageId", "packageVersion", "generatedAt", "provisional", "modules", "integrations", "webhooks", "costEstimate", "credentialReferences", "tenantIsolation", "warnings"],
+  "properties": {
+    "clientSlug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "packageId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "packageVersion": { "$ref": "#/$defs/semver" },
+    "generatedAt": { "type": "string", "minLength": 10 },
+    "provisional": {
+      "type": "boolean",
+      "description": "true if any decision could not be verified against catalogue manifests or tooling output"
+    },
+    "modules": {
+      "type": "object",
+      "required": ["website", "automation"],
+      "properties": {
+        "website": { "type": "array", "items": { "$ref": "#/$defs/moduleRef" } },
+        "automation": { "type": "array", "items": { "$ref": "#/$defs/moduleRef" } }
+      },
+      "additionalProperties": false
+    },
+    "outOfScope": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["item", "disposition"],
+        "properties": {
+          "item": { "type": "string" },
+          "disposition": { "enum": ["phase-2", "upsell", "rejected", "needs-clarification"] },
+          "notes": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "dataModel": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["entity", "fields"],
+        "properties": {
+          "entity": { "type": "string" },
+          "fields": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "integrations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "purpose"],
+        "properties": {
+          "name": { "type": "string" },
+          "purpose": { "type": "string" },
+          "credentialRef": { "$ref": "#/$defs/credentialRef" },
+          "usedBy": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": false
+      }
+    },
+    "webhooks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "method", "path", "payloadFields"],
+        "properties": {
+          "name": { "type": "string" },
+          "method": { "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"] },
+          "path": { "type": "string", "pattern": "^/" },
+          "payloadFields": { "type": "array", "items": { "type": "string" } },
+          "producer": { "type": "string" },
+          "consumer": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "costEstimate": {
+      "description": "Copy from `orchbiz check-budget <slug> --json`; do not hand-calculate.",
+      "type": "object",
+      "required": ["currency", "baseMonthlyCostUSD", "modules", "totalMonthlyCostUSD", "clientBudget", "withinBudget"],
+      "properties": {
+        "currency": { "const": "USD" },
+        "baseMonthlyCostUSD": { "type": "number", "minimum": 0 },
+        "modules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "version", "monthlyCostUSD"],
+            "properties": {
+              "id": { "type": "string" },
+              "version": { "$ref": "#/$defs/semver" },
+              "monthlyCostUSD": { "type": "number", "minimum": 0 }
+            },
+            "additionalProperties": false
+          }
+        },
+        "totalMonthlyCostUSD": { "type": "number", "minimum": 0 },
+        "clientBudget": {
+          "type": "object",
+          "required": ["amount", "currency", "amountUSD"],
+          "properties": {
+            "amount": { "type": "number" },
+            "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+            "amountUSD": { "type": "number" },
+            "fxRatePerUSD": { "type": "number" },
+            "fxAsOf": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "withinBudget": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "credentialReferences": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/credentialRef" },
+      "uniqueItems": true
+    },
+    "tenantIsolation": {
+      "type": "object",
+      "required": ["tenantId", "strategy"],
+      "properties": {
+        "tenantId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "strategy": { "enum": ["tenant_id-column", "schema-per-tenant", "database-per-tenant", "dedicated-deployment"] },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "toolingEvidence": {
+      "description": "Commands run (e.g. orchbiz check-scope / check-budget) and their exit codes.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["command", "exitCode"],
+        "properties": {
+          "command": { "type": "string" },
+          "exitCode": { "type": "integer" },
+          "summary": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "credentialRef": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*_REF$" },
+    "moduleRef": {
+      "type": "object",
+      "required": ["id", "version"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "version": { "$ref": "#/$defs/semver" },
+        "addOn": { "type": "boolean" },
+        "configuration": { "type": "object" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

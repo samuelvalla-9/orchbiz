@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://orchbiz.local/schemas/website-copy.schema.json",
+  "title": "OrchBiz Website Copy",
+  "description": "clients/<client-slug>/deliverables/content/website-copy.json - produced by the Brand & Content agent (Stage 3A).",
+  "type": "object",
+  "required": ["clientSlug", "hero", "services", "differentiators", "testimonials", "faq", "enquiryCta", "footer"],
+  "properties": {
+    "clientSlug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "hero": {
+      "type": "object",
+      "required": ["headline", "subheadline", "primaryCta"],
+      "properties": {
+        "headline": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "subheadline": { "type": "string", "maxLength": 300 },
+        "primaryCta": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "secondaryCta": { "type": "string", "maxLength": 80 }
+      },
+      "additionalProperties": false
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "description"],
+        "properties": {
+          "name": { "type": "string", "minLength": 2 },
+          "description": { "type": "string" },
+          "duration": { "type": "string" },
+          "price": { "type": "string" },
+          "audience": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "differentiators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "description", "source"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "source": { "enum": ["intake", "needs-client-verification"] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "testimonials": {
+      "description": "Only quotes supplied in intake.verified_testimonials, or clearly labelled placeholders. Never invented.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["quote", "attribution", "source"],
+        "properties": {
+          "quote": { "type": "string" },
+          "attribution": { "type": "string" },
+          "source": { "enum": ["intake-verified-testimonials", "placeholder"] }
+        },
+        "additionalProperties": false,
+        "if": { "properties": { "source": { "const": "placeholder" } } },
+        "then": { "properties": { "quote": { "pattern": "^\\[CLIENT TO PROVIDE" } } }
+      }
+    },
+    "faq": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["question", "answer", "source"],
+        "properties": {
+          "question": { "type": "string" },
+          "answer": { "type": "string" },
+          "source": { "enum": ["intake", "suggested-needs-client-approval"] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "about": {
+      "type": "object",
+      "properties": {
+        "heading": { "type": "string" },
+        "body": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "enquiryCta": {
+      "type": "object",
+      "required": ["headline", "buttonLabel"],
+      "properties": {
+        "headline": { "type": "string" },
+        "body": { "type": "string" },
+        "buttonLabel": { "type": "string", "maxLength": 80 },
+        "successMessage": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "footer": {
+      "type": "object",
+      "required": ["businessName"],
+      "properties": {
+        "businessName": { "type": "string" },
+        "location": { "type": "string" },
+        "hours": { "type": "string" },
+        "contactEmail": { "type": "string" },
+        "contactPhone": { "type": "string" },
+        "legalNote": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "seo": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 70 },
+        "description": { "type": "string", "maxLength": 170 },
+        "keywords": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
