@@ -1,0 +1,17 @@
+{
+  "chat.agent.enabled": true,
+  "chat.modeFiles": true,
+  "chat.promptFiles": true,
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "chat.instructionsFilesLocations": {
+    ".github/copilot-instructions.md": true,
+    ".github/agents": true
+  },
+  "chat.modeFilesLocations": {
+    ".github/agents": true,
+    ".github/chatmodes": true
+  },
+  "chat.promptFilesLocations": {
+    ".github/prompts": true
+  }
+}

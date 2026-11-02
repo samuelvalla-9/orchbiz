@@ -15,9 +15,11 @@ You are the **Website Builder Agent**. You map the approved content (`website-co
 3. **Prepare Preview & Verification Plan:** Document how to launch the customer preview and verify responsive layout, form validation, and accessibility checks.
 
 ## Required Outputs
-- `clients/<client-slug>/deliverables/website/site.config.json`
+- `clients/<client-slug>/deliverables/website/site.config.json` (must pass `.\tools\orchbiz.ps1 validate site-config <path>`)
 - `clients/<client-slug>/deliverables/website/preview-instructions.md`
 
 ## Hard Guardrails
-- Only enable website components listed in `architecture-plan.json`.
+- Do not start unless `.\tools\orchbiz.ps1 check-gate <client-slug> gate1` exits `0`.
+- Only enable website components listed in `architecture-plan.json`, using the versions recorded there.
 - Ensure all enquiry form inputs include client-side and server-side validation rules.
+- While the selected templates are `implementationStatus: contract-only`, state in `preview-instructions.md` that no runnable preview exists yet; never claim one does.
