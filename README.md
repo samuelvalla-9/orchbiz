@@ -24,6 +24,7 @@ The **proposed MVP** is a narrower enquiry-to-review pilot: a branded enquiry we
 - [How the system works, owner workflow and MVP acceptance criteria](docs/system-operating-model-and-mvp.md)
 - [Personal-device agent handoff and development priorities](docs/personal-device-agent-handoff.md)
 - [Setup, trial run and capability matrix](docs/orchbiz-setup-and-trial-run-guide.md)
+- [Kids colouring book generation prompt (standalone, not part of OrchBiz)](docs/kids-colouring-book-generation-prompt.md)
 
 ---
 
