@@ -26,7 +26,9 @@ public class LeadRepository {
             OffsetDateTime firstReceivedAt,
             OffsetDateTime lastReceivedAt,
             int submissionCount,
-            String status) {
+            String status,
+            String classificationStatus,
+            String classificationJson) {
     }
 
     private final NamedParameterJdbcTemplate jdbc;
@@ -108,6 +110,26 @@ public class LeadRepository {
                 rs.getObject("first_received_at", OffsetDateTime.class),
                 rs.getObject("last_received_at", OffsetDateTime.class),
                 rs.getInt("submission_count"),
-                rs.getString("status"));
+                rs.getString("status"),
+                rs.getString("classification_status"),
+                rs.getString("classification_json"));
+    }
+
+    public boolean exists(String tenantId, UUID id) {
+        Integer n = jdbc.queryForObject("SELECT COUNT(*) FROM leads WHERE tenant_id = :tenantId AND id = :id",
+                new MapSqlParameterSource("tenantId", tenantId).addValue("id", id), Integer.class);
+        return n != null && n > 0;
+    }
+
+    public void updateClassification(String tenantId, UUID id, String status, String json, OffsetDateTime now) {
+        jdbc.update("""
+                UPDATE leads SET classification_status = :status, classification_json = :json, classified_at = :now
+                WHERE tenant_id = :tenantId AND id = :id""",
+                new MapSqlParameterSource()
+                        .addValue("tenantId", tenantId)
+                        .addValue("id", id)
+                        .addValue("status", status)
+                        .addValue("json", json, Types.VARCHAR)
+                        .addValue("now", now));
     }
 }

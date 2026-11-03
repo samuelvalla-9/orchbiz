@@ -11,7 +11,15 @@ public record OrchbizProperties(
         String adminToken,
         @DefaultValue("_hp") String honeypotField,
         @DefaultValue Cors cors,
-        @DefaultValue Events events) {
+        @DefaultValue Events events,
+        @DefaultValue RateLimit rateLimit) {
+
+    /** Per client IP, fixed one-minute window on POST /api/leads. 0 disables the limit. */
+    public record RateLimit(@DefaultValue("30") int requestsPerMinute) {
+        public boolean enabled() {
+            return requestsPerMinute > 0;
+        }
+    }
 
     public boolean adminEnabled() {
         return adminToken != null && !adminToken.isBlank();
@@ -34,7 +42,15 @@ public record OrchbizProperties(
             @DefaultValue("true") boolean schedulingEnabled) {
 
         public boolean webhookConfigured() {
-            return webhookUrl != null && !webhookUrl.isBlank();
+            return !webhookUrls().isEmpty();
+        }
+
+        /** Comma-separated targets; an event is SENT only when every target returns 2xx. */
+        public List<String> webhookUrls() {
+            if (webhookUrl == null) {
+                return List.of();
+            }
+            return Arrays.stream(webhookUrl.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
         }
     }
 }

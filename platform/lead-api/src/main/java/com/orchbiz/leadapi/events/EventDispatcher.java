@@ -8,6 +8,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -45,32 +46,46 @@ public class EventDispatcher {
             return 0;
         }
         List<EventRepository.EventRow> pending = events.findPending(BATCH);
+        List<String> targets = config.webhookUrls();
         int sent = 0;
         for (EventRepository.EventRow e : pending) {
             int attempts = e.attempts() + 1;
-            try {
-                HttpRequest.Builder req = HttpRequest.newBuilder(URI.create(config.webhookUrl()))
-                        .timeout(Duration.ofSeconds(10))
-                        .header("Content-Type", "application/json")
-                        .header("X-OrchBiz-Event", e.eventType())
-                        .header("X-OrchBiz-Event-Id", e.id().toString())
-                        .POST(HttpRequest.BodyPublishers.ofString(e.payloadJson()));
-                if (config.webhookToken() != null && !config.webhookToken().isBlank()) {
-                    req.header(TOKEN_HEADER, config.webhookToken());
+            List<String> problems = new ArrayList<>();
+            boolean interrupted = false;
+            // Every target receives every retry; receivers de-duplicate on eventId.
+            for (int t = 0; t < targets.size(); t++) {
+                String prefix = targets.size() == 1 ? "" : "target " + (t + 1) + ": ";
+                try {
+                    HttpRequest.Builder req = HttpRequest.newBuilder(URI.create(targets.get(t)))
+                            .timeout(Duration.ofSeconds(10))
+                            .header("Content-Type", "application/json")
+                            .header("X-OrchBiz-Event", e.eventType())
+                            .header("X-OrchBiz-Event-Id", e.id().toString())
+                            .POST(HttpRequest.BodyPublishers.ofString(e.payloadJson()));
+                    if (config.webhookToken() != null && !config.webhookToken().isBlank()) {
+                        req.header(TOKEN_HEADER, config.webhookToken());
+                    }
+                    HttpResponse<Void> res = http.send(req.build(), HttpResponse.BodyHandlers.discarding());
+                    if (res.statusCode() / 100 != 2) {
+                        problems.add(prefix + "HTTP " + res.statusCode());
+                    }
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    problems.add(prefix + "interrupted");
+                    interrupted = true;
+                    break;
+                } catch (Exception ex) {
+                    problems.add(prefix + ex.getClass().getSimpleName() + ": " + ex.getMessage());
                 }
-                HttpResponse<Void> res = http.send(req.build(), HttpResponse.BodyHandlers.discarding());
-                if (res.statusCode() / 100 == 2) {
-                    events.markSent(e.id(), attempts, OffsetDateTime.now(clock).withOffsetSameInstant(ZoneOffset.UTC));
-                    sent++;
-                } else {
-                    fail(e, attempts, "HTTP " + res.statusCode());
-                }
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-                fail(e, attempts, "interrupted");
+            }
+            if (problems.isEmpty()) {
+                events.markSent(e.id(), attempts, OffsetDateTime.now(clock).withOffsetSameInstant(ZoneOffset.UTC));
+                sent++;
+            } else {
+                fail(e, attempts, String.join("; ", problems));
+            }
+            if (interrupted) {
                 break;
-            } catch (Exception ex) {
-                fail(e, attempts, ex.getClass().getSimpleName() + ": " + ex.getMessage());
             }
         }
         return sent;

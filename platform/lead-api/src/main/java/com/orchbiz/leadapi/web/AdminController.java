@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.orchbiz.leadapi.events.EventRepository;
 import com.orchbiz.leadapi.lead.ApiException;
 import com.orchbiz.leadapi.lead.LeadRepository;
 import com.orchbiz.leadapi.lead.LeadService;
@@ -40,11 +41,14 @@ public class AdminController {
     private final TenantRepository tenants;
     private final LeadRepository leads;
     private final LeadService leadService;
+    private final EventRepository events;
 
-    public AdminController(TenantRepository tenants, LeadRepository leads, LeadService leadService) {
+    public AdminController(TenantRepository tenants, LeadRepository leads, LeadService leadService,
+                           EventRepository events) {
         this.tenants = tenants;
         this.leads = leads;
         this.leadService = leadService;
+        this.events = events;
     }
 
     @PutMapping
@@ -99,6 +103,9 @@ public class AdminController {
             m.put("firstReceivedAt", row.firstReceivedAt().toString());
             m.put("lastReceivedAt", row.lastReceivedAt().toString());
             m.put("submissionCount", row.submissionCount());
+            m.put("classificationStatus", row.classificationStatus());
+            m.put("classification", row.classificationJson() == null ? null : leadService.readFields(row.classificationJson()));
+            m.put("notificationStatus", summarise(events.statusesForLead(tenantId, row.id())));
             return m;
         }).toList();
         Map<String, Object> body = new LinkedHashMap<>();
@@ -106,6 +113,17 @@ public class AdminController {
         body.put("total", leads.count(tenantId));
         body.put("items", items);
         return body;
+    }
+
+    /** FAILED if any event failed, PENDING if any is still queued, SENT when all delivered, null when none. */
+    static String summarise(List<String> statuses) {
+        if (statuses.isEmpty()) {
+            return null;
+        }
+        if (statuses.contains(EventRepository.FAILED)) {
+            return EventRepository.FAILED;
+        }
+        return statuses.contains(EventRepository.PENDING) ? EventRepository.PENDING : EventRepository.SENT;
     }
 
     private static void checkTenantId(String tenantId) {

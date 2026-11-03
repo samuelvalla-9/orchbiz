@@ -11,16 +11,20 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.orchbiz.leadapi.web.AdminAuthInterceptor;
+import com.orchbiz.leadapi.web.RateLimitInterceptor;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
     private final OrchbizProperties properties;
     private final AdminAuthInterceptor adminAuthInterceptor;
+    private final RateLimitInterceptor rateLimitInterceptor;
 
-    public WebConfig(OrchbizProperties properties, AdminAuthInterceptor adminAuthInterceptor) {
+    public WebConfig(OrchbizProperties properties, AdminAuthInterceptor adminAuthInterceptor,
+                     RateLimitInterceptor rateLimitInterceptor) {
         this.properties = properties;
         this.adminAuthInterceptor = adminAuthInterceptor;
+        this.rateLimitInterceptor = rateLimitInterceptor;
     }
 
     @Bean
@@ -43,6 +47,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(rateLimitInterceptor).addPathPatterns("/api/leads");
         registry.addInterceptor(adminAuthInterceptor).addPathPatterns("/api/admin/**");
     }
 }

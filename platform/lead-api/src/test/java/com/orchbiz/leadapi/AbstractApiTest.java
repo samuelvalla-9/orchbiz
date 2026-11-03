@@ -45,13 +45,16 @@ abstract class AbstractApiTest {
     @Autowired ObjectMapper json;
     @Autowired JdbcTemplate jdbc;
     @Autowired MutableClock clock;
+    @Autowired com.orchbiz.leadapi.web.RateLimitInterceptor rateLimiter;
 
     @BeforeEach
     void cleanDatabase() throws Exception {
+        jdbc.update("DELETE FROM follow_up_drafts");
         jdbc.update("DELETE FROM lead_events");
         jdbc.update("DELETE FROM leads");
         jdbc.update("DELETE FROM tenants");
         clock.reset();
+        rateLimiter.reset();
         createTenant(TENANT, true);
     }
 
@@ -82,6 +85,13 @@ abstract class AbstractApiTest {
     ResultActions postLead(Object body) throws Exception {
         return mvc.perform(post("/api/leads").contentType(MediaType.APPLICATION_JSON)
                 .content(body instanceof String s ? s : json.writeValueAsString(body)));
+    }
+
+    String createLead(String tenantId) throws Exception {
+        String body = postLead(validLead(tenantId))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        return json.readTree(body).get("leadId").asText();
     }
 
     ResultActions adminGet(String path) throws Exception {
