@@ -20,7 +20,7 @@
         "options": {}
       },
       "credentials": {
-        "httpHeaderAuth": { "name": "LEAD_EVENTS_WEBHOOK_HEADER_REF" }
+        "httpHeaderAuth": { "id": null, "name": "LEAD_EVENTS_WEBHOOK_HEADER_REF" }
       }
     },
     {
@@ -73,7 +73,7 @@
         "options": {}
       },
       "credentials": {
-        "smtp": { "name": "SMTP_CREDENTIAL_REF" }
+        "smtp": { "id": null, "name": "SMTP_CREDENTIAL_REF" }
       }
     },
     {

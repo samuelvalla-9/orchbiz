@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "category": "website",
   "purpose": "Validated lead capture form with client-side and server-side validation, consent text, spam protection and submission to the lead API / capture webhook.",
-  "implementationStatus": "contract-only",
+  "implementationStatus": "in-development",
   "inputSchema": {
     "type": "object",
     "required": ["fields", "submitEndpoint"],
@@ -41,8 +41,15 @@
     { "id": "ENQ-04", "description": "Keyboard-only completion and screen-reader labels", "expectedOutcome": "All fields reachable and labelled; errors announced" }
   ],
   "knownLimitations": [
-    "Contract only: Angular implementation not yet built (Phase B).",
+    "Angular form implementation is in development; a local browser run verified validation, submission stored in PostgreSQL, duplicate, honeypot, inactive/mismatched tenant error, allowed and denied CORS origins and axe WCAG 2.1 A/AA; that browser test is not yet in the repo or CI.",
     "File uploads are not supported."
   ],
-  "rollbackApproach": "Point submitEndpoint back to the previous API version or temporarily replace the form with a mailto/phone CTA via config and redeploy."
+  "rollbackApproach": "Point submitEndpoint back to the previous API version or temporarily replace the form with a mailto/phone CTA via config and redeploy.",
+  "implementation": [
+    {
+      "kind": "angular-component",
+      "path": "catalogue/websites/business-landing-page/template/src/app/app.ts",
+      "verifiedBy": "Angular unit tests and production build in CI; a local Playwright/axe browser run against the lead API and PostgreSQL passed (not yet in the repo or CI)"
+    }
+  ]
 }

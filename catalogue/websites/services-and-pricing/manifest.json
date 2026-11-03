@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "category": "website",
   "purpose": "Card grid of courses or services with duration, price/fee range, audience and a per-card enquiry CTA that pre-selects the course in the enquiry form.",
-  "implementationStatus": "contract-only",
+  "implementationStatus": "in-development",
   "inputSchema": {
     "type": "object",
     "required": ["services"],
@@ -46,8 +46,15 @@
     { "id": "SNP-03", "description": "Render with showPrices=false", "expectedOutcome": "No price text appears anywhere in the section" }
   ],
   "knownLimitations": [
-    "Contract only: Angular implementation not yet built (Phase B).",
+    "Angular template is in development; services rendered and a 390px mobile layout had no horizontal overflow in a fictional-tenant browser run; live client configuration remains unverified.",
     "No online payment or checkout."
   ],
-  "rollbackApproach": "Disable the module in site.config.json enabledModules and redeploy, or redeploy the previous build."
+  "rollbackApproach": "Disable the module in site.config.json enabledModules and redeploy, or redeploy the previous build.",
+  "implementation": [
+    {
+      "kind": "angular-component",
+      "path": "catalogue/websites/business-landing-page/template/src/app/app.html",
+      "verifiedBy": "Angular unit tests and production build in CI; a fictional-tenant browser render check passed locally"
+    }
+  ]
 }

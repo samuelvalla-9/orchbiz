@@ -2,7 +2,7 @@
 
 This guide explains how the OrchBiz GitHub Copilot agent setup works, walks through a full trial run using the sample intake, and lists what currently works, what is a stub, and how to move to a working or complete system.
 
-> **Status snapshot (2026-10-29):** OrchBiz currently works as an **agent-driven specification and documentation pipeline**. The agents can read an intake, validate it, plan from the package definition, and produce documents and configuration drafts. It does **not** yet deliver a working website or automation, because the reusable catalogue modules, validation scripts and runtime stack have not been built.
+> **Status snapshot (2026-11-03):** The deterministic CLI and lead API are implemented and their automated suites pass; four automation modules have blueprints, and the n8n Code-node logic is tested. A reusable Angular public-site template now builds and passes component tests with Node 24 LTS. Without Docker, portable PostgreSQL 16.10 migrations and API smoke checks passed, a headless-Chrome run of the template against the API passed (including CORS and an axe audit), and the n8n blueprints were imported and published in n8n 2.46.4. The Docker Compose stack and live n8n workflow executions are still unverified. See [`personal-device-agent-handoff.md`](personal-device-agent-handoff.md) for exact evidence and limitations.
 
 ---
 
@@ -40,7 +40,7 @@ The canonical contracts in `agents/prompts/` are the source of truth. The `.agen
    - Git CLI, configured as described in [`docs/git-workflow.md`](git-workflow.md).
    - Java 17+ and Maven 3.9+ for the OrchBiz CLI (`tools/README.md`). The first `.\tools\orchbiz.ps1` call builds it.
    - Install the commit guard once per clone: `git config core.hooksPath tools/hooks`.
-   - *(Phase B)* Node 20+ and the Angular CLI for the website template; Docker or a hosted n8n/Postgres for automations.
+   - *(Phase B)* A Node release supported by the selected Angular version and the Angular CLI for the website template; Docker or hosted n8n/Postgres for automations.
 2. **Open the folder** `orchbiz/` as the workspace root, so `.github/` and `.vscode/` are at the top level.
 3. **Reload the window** using `Ctrl+Shift+P` and **Developer: Reload Window** so Copilot picks up the new files.
 4. **Check that the agents are available.**
@@ -132,7 +132,7 @@ Agents are instructed never to change this flag for you.
 - `website/site.config.json` and `website/preview-instructions.md`.
 - `automations/workflows-config.json`, n8n workflow JSON, `env.template` and `workflow-test-plan.md`.
 
-> ⚠️ **Expected limitation:** These outputs are **drafts of configuration and documentation**. No website template exists to apply `site.config.json` to, so you cannot run a preview. Any n8n JSON is written by the agent rather than derived from a tested blueprint, so treat it as a sketch. Do not treat it as importable or tested.
+> ⚠️ **Expected limitation:** These outputs are **drafts of configuration and documentation**. A reusable website template now exists, but this trial does not by itself configure a real tenant/API, prove the generated artifacts work in a browser, or provide integration evidence. Any n8n JSON is written by the agent rather than derived from a tested blueprint, so treat it as a sketch. Do not treat it as importable or tested.
 
 **Negative test:** Before Step 2, set Gate 1 back to `false` and run `/02-generate-deliverables`. The agent should refuse and list the Gate 1 artifacts that need review.
 
@@ -192,8 +192,8 @@ git status --short   # should show no clients/ entries
 | Intake schema (consent, enums, normalized budget amount/currency) | `intake/intake.schema.json`. The sample CSV passes. |
 | CSV **and `.xlsx`** intake parsing | `.\tools\orchbiz.ps1 parse-intake <slug>` writes `intake.validated.json` only when it is schema-valid. |
 | Package scope definition and check | `catalogue/packages/starter-lead-to-appointment.json` + `check-scope` |
-| Module manifests | All 14 manifests pass `validate-catalogue`. `capture-and-store-lead`, `notify-business-owner`, `classify-enquiry` and `draft-follow-up` are `0.2.0 in-development`; the other 10 are `0.1.0 contract-only`. |
-| Lead API | `platform/lead-api`: `POST /api/leads` with validation, tenant isolation, dedupe window, honeypot, PostgreSQL via Flyway, and a `lead.created` outbox delivered to one or more n8n webhooks with a shared-token header, per-IP rate limiting, and admin write-back endpoints for classifications and follow-up drafts (drafts are always `awaiting-approval`). 28 automated tests run on H2 (PostgreSQL mode), and `tools/smoke/lead-api-smoke.ps1` passes against a locally running instance. |
+| Module manifests | All 14 manifests pass `validate-catalogue`. Four automation modules and four public website modules are `in-development`; six remain `0.1.0 contract-only`. |
+| Lead API | `platform/lead-api`: `POST /api/leads` with validation, tenant isolation, dedupe window, honeypot, PostgreSQL via Flyway, and a `lead.created` outbox delivered to one or more n8n webhooks with a shared-token header, per-IP rate limiting, and admin write-back endpoints for classifications and follow-up drafts (drafts are always `awaiting-approval`). The current API Maven suite passes 28 tests on H2 (PostgreSQL mode). The smoke script passed in an earlier local run; it was not rerun in the 2026-11-03 baseline. |
 | CI | `.github/workflows/ci.yml` builds and tests the CLI and lead API, validates the catalogue and blueprints, runs the n8n Code-node tests, and scans for secrets. |
 | Output schemas | `schemas/` covers `state`, `architecture-plan`, `website-copy`, `site-config`, `workflows-config`, `qa-report`, `package`. |
 | Budget check | `check-budget` sums manifest costs + base infrastructure and converts the client budget with `catalogue/fx-rates.json`. |
@@ -207,9 +207,9 @@ git status --short   # should show no clients/ entries
 
 | Area | Current state | Risk |
 |---|---|---|
-| `catalogue/websites/` | Manifests only. No Angular template code yet. | `site.config.json` is a validated draft; there is nothing to render a preview. |
+| `catalogue/websites/business-landing-page/template/` | Angular 21 public site with data-driven sections, responsive styles, a dynamic enquiry form, dev API proxy, unit tests and production build. Uses Node 24 LTS. | A fictional-tenant browser run against the real API (CORS, axe WCAG 2.1 A/AA, 390px layout) passed locally but is not yet a committed test. Configured client artifacts, an in-repo browser suite and deployment still need verification. Dashboard and full scheduler remain out of scope. |
 | `catalogue/automations/` | Three blueprints exist: `notify-business-owner` (email only, dry-run/staging), `classify-enquiry` (consent-gated LLM labelling) and `draft-follow-up` (template drafts saved as `awaiting-approval`, never sent). Their structure is checked by the CLI and the Code-node logic is unit-tested with Node, but **none has been imported into a running n8n**. The other automations are manifests only. | Import them and run NBO/CLE/DFU tests before relying on them. There is no draft approval UI yet. |
-| Lead API runtime | Tested on H2 only. `docker-compose.yml` and the Dockerfile are written but have not been run, because the corporate device has no Docker. | Run `docker compose up` on a machine with Docker and repeat CSL-01..04 against real PostgreSQL. |
+| Lead API runtime | Automated tests use H2. Flyway migrations and the API smoke checks passed against portable PostgreSQL 16.10 without Docker; `docker-compose.yml` and the Dockerfile themselves have not been run because Docker was unavailable. | Run `docker compose up` on a Docker-capable machine and repeat the smoke test, including notification. |
 | Cost figures and FX rates | Operator estimates in manifests, package `baseInfrastructure` and `fx-rates.json`. | Confirm with real provider pricing before quoting a client. |
 | Gate enforcement | CLI + agent contracts + pre-commit hook + CI checks. | A manual edit outside the agents could still skip a gate. |
 | Orchestration | Manual. You run `/01`, `/02` and `/03` yourself. | Matches the Phase 1 design, but nothing runs unattended. |
@@ -217,8 +217,8 @@ git status --short   # should show no clients/ entries
 
 ### ❌ Not implemented
 
-- Website runtime: the Angular templates. On the corporate device, npm is blocked by the proxy certificate (`SELF_SIGNED_CERT_IN_CHAIN`). Build them on a personal device, or ask IT for the corporate root CA (`NODE_EXTRA_CA_CERTS`) or an internal npm mirror.
-- A running n8n instance. The compose file is ready but has not been run, and no hosting has been chosen.
+- A committed Playwright/axe suite and Lighthouse checks. A session-only browser run against the running lead API passed, but it is not in the repository or CI.
+- Verified n8n workflow executions. The blueprints import and publish in an npm-installed n8n 2.46.4, but no notification, classification or draft execution has been verified, the compose file has not been run, and no hosting has been chosen.
 - Automated tests of website deliverables: Playwright and Lighthouse/axe. (An API smoke test exists: `tools/smoke/lead-api-smoke.ps1`.)
 - Staging and production deployment targets.
 - A headless orchestrator triggered by form submission (Phase 3).
@@ -243,18 +243,18 @@ Delivered: the Java 17 OrchBiz CLI (`tools/README.md`), output schemas in `schem
 
 ### Phase B: Minimal working product, an end-to-end demo for one client (about 3–6 weeks) — 🟡 in progress
 
-1. **Website template** — ⏳ pending. Build one parameterized **Angular** template that renders entirely from `site.config.json` and `website-copy.json`, in `catalogue/websites/`. This needs Node 20+ and the Angular CLI; npm is blocked on the corporate device. The form posts to the lead API using the `enquiry-form` payload contract.
-2. **Lead API and storage** — ✅ built and unit-tested (`platform/lead-api/README.md`). Remaining: run it against real PostgreSQL.
+1. **Website template** — 🟡 implemented in development at `catalogue/websites/business-landing-page/template/`. It renders public copy/config assets, tests the `{tenantId, submittedAt, sourcePage, fields}` form payload, and builds under Node 24 LTS. Remaining: real API/proxy test, Playwright, responsive and accessibility evidence, preview/config packaging and deployment. Node 24 LTS is supported by Angular 21; Node 25.9.0 on the inspected machine is not.
+2. **Lead API and storage** — ✅ built and unit-tested (`platform/lead-api/README.md`). Migrations and smoke checks passed against portable PostgreSQL 16.10; remaining: run it in the Compose stack.
 3. **n8n blueprints** — 🟡 `notify-business-owner`, `classify-enquiry` and `draft-follow-up` are written, structure-checked and logic-tested; import them and run NBO/CLE/DFU tests. Capture is handled by the lead API, not n8n.
 4. **Local stack** — 🟡 `docker-compose.yml` + `.env.example` are written but have not been run. `make preview CLIENT=<slug>` is still to do and depends on the website template.
-5. **Test evidence** — 🟡 `tools/smoke/lead-api-smoke.ps1` covers the API contract tests. Still to add: Playwright checks for form validation and successful submission, axe and Lighthouse checks for accessibility, and curl/Newman tests from `workflow-test-plan.md`. Save the results in `clients/<slug>/qa/evidence/`, where the QA agent can cite them.
-6. **CI** — ✅ `.github/workflows/ci.yml`. Add template tests once the Angular template exists.
+5. **Test evidence** — 🟡 Angular unit tests cover rendering, validation, payload, duplicate, API error and rate-limit handling. `tools/smoke/lead-api-smoke.ps1` covers earlier API contract checks. A session-only Playwright/axe run against the API passed (18 checks, including CORS); still to add: that suite in the repository/CI, Lighthouse and workflow execution checks. Save client evidence in `clients/<slug>/qa/evidence/`.
+6. **CI** — 🟡 `.github/workflows/ci.yml` now installs the locked Angular dependencies with Node 24, runs the unit suite and production build, and validates the demo config/copy. Confirm the updated workflow in GitHub Actions after these changes are pushed.
 
 **Order for running the local stack (on a machine with Docker):** `copy .env.example .env` and fill in the values → `docker compose up -d --build`. In n8n (http://localhost:5678), create the Header Auth credential `LEAD_EVENTS_WEBHOOK_HEADER_REF` with header `X-OrchBiz-Token` and the value of `LEAD_EVENTS_WEBHOOK_TOKEN`. Also create an SMTP credential `SMTP_CREDENTIAL_REF` that points at a test mailbox. Import `catalogue/automations/notify-business-owner/notify-business-owner.workflow.json` and select both credentials. Activate the workflow (dry-run by default). Register the tenant with `PUT /api/admin/tenants/apex-coaching`, then run `.\tools\smoke\lead-api-smoke.ps1` and check the n8n execution log.
 
 To add classification and drafts: create the Header Auth credential `ORCHBIZ_ADMIN_API_REF` (header `Authorization`, value `Bearer <ORCHBIZ_ADMIN_TOKEN>`). Create `LLM_API_REF` only if the client gave `ai_data_consent`. Import `classify-enquiry.workflow.json` and `draft-follow-up.workflow.json`, edit the `CONFIG` block in each, and activate both. Then add the classify webhook to `LEAD_EVENTS_WEBHOOK_URL` in `.env` and run `docker compose up -d` again. Drafts appear under `GET /api/admin/tenants/<slug>/leads/<leadId>/drafts`.
 
-**Phase B exit test:** The `apex-coaching` trial produces a locally running site. A test enquiry reaches Postgres and creates an owner notification in dry-run mode. QA reports `PASSED` based on real evidence.
+**Phase B exit test:** The `apex-coaching` trial produces a locally running site. A test enquiry reaches Postgres and creates an owner notification in dry-run mode. QA reports `PASSED` based on real evidence. This remains a target; the stack and website have not yet met it.
 
 ### Phase C: Full capacity (ongoing)
 

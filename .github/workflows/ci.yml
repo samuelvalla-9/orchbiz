@@ -31,10 +31,24 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: catalogue/websites/business-landing-page/template/package-lock.json
 
       - name: n8n Code-node logic tests (no npm dependencies)
         run: node tools/workflow-tests/code-nodes.test.js
+
+      - name: Website template - install, test and build
+        working-directory: catalogue/websites/business-landing-page/template
+        run: |
+          npm ci
+          npm test -- --watch=false
+          npm run build
+
+      - name: Validate fictional website fixtures
+        run: |
+          java -jar tools/orchbiz-cli/target/orchbiz-cli.jar validate site-config catalogue/websites/business-landing-page/template/public/assets/site.config.json
+          java -jar tools/orchbiz-cli/target/orchbiz-cli.jar validate website-copy catalogue/websites/business-landing-page/template/public/assets/website-copy.json
 
       - name: Scan repository for secrets
         run: java -jar tools/orchbiz-cli/target/orchbiz-cli.jar scan-secrets .

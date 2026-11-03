@@ -1,0 +1,78 @@
+{
+  "clientSlug": "example-learning-studio",
+  "enabledModules": [
+    { "id": "business-landing-page", "version": "0.1.0" },
+    { "id": "services-and-pricing", "version": "0.1.0" },
+    { "id": "enquiry-form", "version": "0.1.0" },
+    { "id": "appointment-booking", "version": "0.1.0" }
+  ],
+  "theme": {
+    "primaryColor": "#263B63",
+    "secondaryColor": "#B87842",
+    "neutralColor": "#253047",
+    "backgroundColor": "#F5F3EF",
+    "headingFont": "Georgia, serif",
+    "bodyFont": "Arial, sans-serif"
+  },
+  "assets": {
+    "usesPlaceholders": true
+  },
+  "contentSource": "../content/website-copy.json",
+  "enquiryForm": {
+    "submitEndpoint": "/api/leads",
+    "consentText": "Your details will be used to respond to this enquiry.",
+    "fields": [
+      {
+        "name": "full_name",
+        "label": "Your name",
+        "type": "text",
+        "required": true,
+        "validation": { "minLength": 2, "maxLength": 120 }
+      },
+      {
+        "name": "email",
+        "label": "Email address",
+        "type": "email",
+        "required": true,
+        "validation": { "maxLength": 320 }
+      },
+      {
+        "name": "phone",
+        "label": "Phone number",
+        "type": "tel",
+        "required": true,
+        "validation": { "maxLength": 32 }
+      },
+      {
+        "name": "course_interest",
+        "label": "What would you like to ask about?",
+        "type": "select",
+        "required": true,
+        "validation": {},
+        "options": [
+          "Foundation learning (fictional demo)",
+          "One-to-one sessions (fictional demo)",
+          "Not sure yet"
+        ]
+      },
+      {
+        "name": "message",
+        "label": "Anything else you would like us to know?",
+        "type": "textarea",
+        "required": false,
+        "validation": { "maxLength": 2000 }
+      }
+    ]
+  },
+  "booking": {
+    "type": "Manual Follow-up Only"
+  },
+  "api": {
+    "baseUrl": "",
+    "tenantId": "example-learning-studio"
+  },
+  "seo": {
+    "title": "Example Learning Studio | Fictional Demo",
+    "description": "A fictional sample website used to demonstrate the OrchBiz reusable website template."
+  }
+}

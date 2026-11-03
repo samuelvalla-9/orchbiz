@@ -5,7 +5,7 @@
   "purpose": "Sends an instant internal alert to the client's staff when a new lead is captured, via email, an approved WhatsApp template, Telegram or Slack.",
   "implementationStatus": "in-development",
   "implementation": [
-    { "kind": "n8n-workflow", "path": "catalogue/automations/notify-business-owner/notify-business-owner.workflow.json", "verifiedBy": "untested: structure checked by validate-catalogue; not yet imported into a running n8n instance" }
+    { "kind": "n8n-workflow", "path": "catalogue/automations/notify-business-owner/notify-business-owner.workflow.json", "verifiedBy": "partial: structure checked by validate-catalogue; imported into npm-installed n8n 2.46.4 on PostgreSQL and published; live dry-run execution not yet verified" }
   ],
   "inputSchema": {
     "type": "object",

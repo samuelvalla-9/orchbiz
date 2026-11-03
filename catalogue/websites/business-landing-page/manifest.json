@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "category": "website",
   "purpose": "Responsive single-page layout with hero, value proposition, differentiators, testimonials, about and footer sections, rendered entirely from site.config.json and website-copy.json.",
-  "implementationStatus": "contract-only",
+  "implementationStatus": "in-development",
   "inputSchema": {
     "type": "object",
     "required": ["siteConfig", "websiteCopy"],
@@ -37,8 +37,15 @@
     { "id": "BLP-03", "description": "Render with an empty testimonials array", "expectedOutcome": "Testimonials section is omitted, not shown empty" }
   ],
   "knownLimitations": [
-    "Contract only: Angular implementation not yet built (Phase B).",
+    "Angular template is in development; a fictional-tenant browser run (headless Chrome via Playwright) passed against the real API and PostgreSQL, including axe WCAG 2.1 A/AA and a 390px mobile layout; real client content, an in-repo browser test suite and deployment remain unverified.",
     "Single-language content only."
   ],
-  "rollbackApproach": "Redeploy the previous static build artefact (kept per release tag) to the hosting provider."
+  "rollbackApproach": "Redeploy the previous static build artefact (kept per release tag) to the hosting provider.",
+  "implementation": [
+    {
+      "kind": "angular-component",
+      "path": "catalogue/websites/business-landing-page/template/src/app/app.html",
+      "verifiedBy": "Angular unit tests and production build in CI; a local Playwright/axe browser run against the lead API and PostgreSQL passed (not yet in the repo or CI)"
+    }
+  ]
 }

@@ -10,6 +10,12 @@
 - Exit `0` = pass, `1` = check failed/blocked, `2` = usage/environment error. Treat any non-zero exit as a blocker, quote its `FAIL` lines, and never replace a CLI check with your own judgement or hand-calculation.
 - Output artifacts must validate against `schemas/*.schema.json` (`state`, `architecture-plan`, `website-copy`, `site-config`, `workflows-config`, `qa-report`).
 
+## Test Resource Warning and Manual Execution
+- Before starting a full test catalogue, Maven package/test suite, dependency install, container integration run or repeated broad validation, warn the developer that it can consume substantial CPU, memory, time and agent tokens (especially when polling or reading verbose logs). Recommend manual execution using `docs/manual-test-runbook.md` and obtain explicit confirmation before running it through the agent. An explicit request to run that specific check authorizes it; still give the warning first.
+- Default broad test execution to the developer's terminal. Do not automatically start, poll, parallelize or repeat heavyweight suites. For documentation-only changes, do not run builds or tests unless documentation tests exist.
+- Prefer the smallest relevant check when agent execution is authorized; distinguish the lightweight `validate-catalogue` command from full suites, while warning that its wrapper may build a missing/stale CLI jar. Do not present every catalogue validation as inherently expensive.
+- Ask for command, exit code and concise failure excerpts rather than entire logs. Manually supplied results must identify their source; skipped, blocked or unexecuted checks must never be reported as passed. Manual execution changes who runs the checks, not the required validation, CLI rules or human approval gates.
+
 ## Client State Tracking
 - Each engagement is isolated under `clients/<client-slug>/`.
 - Initialize its `state.json` with `.\tools\orchbiz.ps1 init-client <client-slug>`; update stage status, timestamps, approvals and `auditLog` as work progresses, and keep it valid against `schemas/state.schema.json`.

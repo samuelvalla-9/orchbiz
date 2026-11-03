@@ -2,6 +2,10 @@
 
 Prepared: 2026-11-03.
 
+For terminal-by-terminal manual verification on any developer device, use the
+[manual test runbook](manual-test-runbook.md). Run heavy suites outside the agent
+conversation to reduce token usage; share only concise results or failure excerpts.
+
 ## 1. Mission and immediate objective
 
 The owner is launching a business that sells reusable business automation systems to clients. OrchBiz is the delivery workspace for that business: an agent-assisted process for turning a client's questionnaire into scoped requirements, architecture, website content, a configured website, automations, QA evidence and handover documents.
@@ -26,13 +30,15 @@ Do not replace this stack, expand package scope or introduce a new orchestration
 |---|---|
 | Repository | `samuelvalla-9/orchbiz` |
 | Working branch | `GH-Copilot_Setup` |
-| Latest implementation/documentation commit before this handoff | `d503873` |
+| Latest inspected commit | `8f75de4` |
 | Remote status when inspected | Local branch aligned with `origin/GH-Copilot_Setup` |
-| Worktree before creating this document | Clean |
-| Corporate device | Windows, Java 17, Maven 3.9.4, Node 22.22.0 |
-| Corporate restrictions | No Docker; npm encountered `SELF_SIGNED_CERT_IN_CHAIN` |
+| Worktree when inspected | Clean |
+| Machine inspected for this update | Non-personal Windows 11 workstation; this is not the personal-device inventory |
+| Tools on inspected machine | Java 24.0.1, Maven 4.0.0-rc-4, system Node 25.9.0/npm 11.6.2, Angular CLI 21.2.11; isolated Node 24.22.2 LTS/npm 11.19.1 downloaded for this workspace session |
+| Runtime/toolchain limitation | Docker is unavailable. System Node 25.9.0 is unsupported by Angular CLI; isolated Node 24.22.2 is supported |
+| Historical network issue | npm previously encountered `SELF_SIGNED_CERT_IN_CHAIN`; npm registry access succeeded during this update without TLS workarounds |
 
-This document was prepared against `d503873` and is delivered in a later documentation commit. Fetch the latest `GH-Copilot_Setup` branch rather than checking out only that older commit. Read `docs\system-operating-model-and-mvp.md` for the owner workflow and proposed narrower pilot scope; that proposal does not change the existing package manifest or authorize a release. Do not copy corporate credentials, Maven settings, credential stores or machine-specific session folders.
+This checkout was inspected at `8f75de4`; fetch the latest `GH-Copilot_Setup` branch rather than checking out only that commit. The code-level checks below were run on the non-personal workstation and do not establish the personal device's software versions or runtime readiness. Read `docs\system-operating-model-and-mvp.md` for the owner workflow and proposed narrower pilot scope; that proposal does not change the existing package manifest or authorize a release. Do not copy credentials, Maven settings, credential stores or machine-specific session folders from another device.
 
 Recent commits, oldest first:
 
@@ -48,6 +54,7 @@ Recent commits, oldest first:
 | `0e91deb` | Production Clock/WebConfig bean-cycle fix and regression test |
 | `480ffb7` | HTTP smoke-test script |
 | `d503873` | Documentation and configuration updates |
+| `8f75de4` | Additional documentation |
 
 Start with Git CLI, not an IDE's Source Control interface:
 
@@ -129,41 +136,91 @@ Migration `V1` creates the initial lead storage; `V2__classification_and_drafts.
 
 ### 4.3 Catalogue implementation status
 
-There are 14 module manifests. Four are `0.2.0`, `in-development`:
+There are 14 module manifests. Eight are `in-development` (four automation modules and four public website modules):
 
 | Module | Implementation | Remaining evidence/limitations |
 |---|---|---|
-| `capture-and-store-lead` | Lead API | Real PostgreSQL/container verification outstanding |
-| `notify-business-owner` | n8n blueprint | Email only; dry-run/staging; no live channel routing or complete fallback |
-| `classify-enquiry` | n8n blueprint plus API write-back | Consent defaults off; n8n import/execution not verified |
-| `draft-follow-up` | n8n blueprint plus API draft storage | Template-first; optional LLM; no approval UI or sending |
+| `capture-and-store-lead` | Lead API | Verified on portable PostgreSQL 16.10 (section 4.5); Docker Compose stack still unverified |
+| `notify-business-owner` | n8n blueprint | Email only; dry-run/staging; imported and published in n8n 2.46.4, live execution not yet verified |
+| `classify-enquiry` | n8n blueprint plus API write-back | Consent defaults off; imported and published, live execution not yet verified |
+| `draft-follow-up` | n8n blueprint plus API draft storage | Template-first; optional LLM; no approval UI or sending; imported and published, live execution not yet verified |
+| `business-landing-page`, `services-and-pricing`, `enquiry-form` | Angular website template under `catalogue\websites\business-landing-page\template` | Unit/build plus a local browser run against the real API (section 4.5); real client content, an in-repo browser suite and deployment remain |
+| `appointment-booking` | External HTTPS booking link or manual follow-up display only | No calendar integration, slot booking, confirmation or reminders |
 
-The remaining 10 manifests are `0.1.0`, `contract-only`: seven website modules and three other automations. Notably, `schedule-appointment` and `send-approved-reminder` are included in the starter package but are not implemented. `weekly-performance-report` is an optional add-on, not an MVP prerequisite.
+The remaining six manifests are `0.1.0`, `contract-only`: three website modules and three other automations. Notably, `schedule-appointment` and `send-approved-reminder` are included in the starter package but are not implemented. `weekly-performance-report` is an optional add-on, not an MVP prerequisite.
 
 ### 4.4 Last completed validation
 
-These are historical results from the corporate device, not a guarantee of success on the personal device:
+The following baseline was rerun on the non-personal workstation for this handoff update. It is not a personal-device check:
+
+| Check | Result on inspected workstation |
+|---|---|
+| CLI Maven package/tests | Passed: 16 tests, no failures/errors |
+| Lead API Maven package/tests | Passed: 28 tests, no failures/errors |
+| Catalogue validation | Passed: 14 module manifests and all packages |
+| n8n Code-node tests | Passed: CLE-01/02/03 and DFU-01/02/03 |
+| Repository secret scan | Passed: 131 files scanned, no secrets found |
+| Latest GitHub Actions run on `GH-Copilot_Setup` | Confirmed completed successfully for commit `8f75de4` |
+| Website dependency install | Passed clean `npm ci` with the generated lockfile; `npm ls --depth=0` passed |
+| Website component tests | Passed: 11 tests, including rendering, required/email validation, payload shape, duplicates, API errors, rate limiting, honeypot forwarding and accessible link names |
+| Website production build | Passed with Angular CLI 21.2.11 on Node 24.22.2 LTS |
+| Website demo artifacts | Both fictional fixtures passed `site-config` and `website-copy` CLI schema validation |
+| Website local preview | Dev server returned HTTP 200 for `/` and `assets/site.config.json`; no backend was running |
+| Catalogue after website changes | Passed: all 14 module manifests and packages |
+| Secret scan after website changes | Passed: 159 files scanned, no secrets found |
+
+These local Maven checks happened to pass with Java 24.0.1 and Maven 4.0.0-rc-4. Those are not the documented Java 17+/Maven 3.9+ baseline; verify the supported toolchain on the personal device rather than treating this as compatibility evidence. Docker was unavailable, so the Compose stack itself was not run; section 4.5 records the portable PostgreSQL, n8n and browser checks that were possible instead.
+
+The system Node 25.9.0 is unsupported by Angular CLI 21.2.11. To avoid a machine-wide install or changing another project's runtime, Node 24.22.2 LTS was downloaded into the session's private files directory and used explicitly. It reports supported in `ng version`; npm registry downloads succeeded without changing TLS settings. This isolated runtime is temporary session storage, not a substitute for installing Node 24 LTS on the personal device.
+
+An Angular 21 website template now exists at `catalogue\websites\business-landing-page\template`, with an npm lockfile. It renders schema-validated public assets, a configurable landing/services view, validated enquiry form, backend error states and limited external/manual booking content. Its fictional demo config and copy passed the OrchBiz CLI schema checks. The production build and 11 component tests pass, and a local browser run against the real API passed (section 4.5). Do not treat it as release-ready until real client content, an in-repo browser test suite and deployment checks are complete.
+
+Earlier historical results and limitations:
 
 | Check | Last result |
 |---|---|
-| CLI Maven suite | 16 tests, no failures/errors |
-| Lead API Maven suite | 28 tests, no failures/errors, H2 in PostgreSQL mode |
-| Catalogue validation | 14 manifests and packages passed |
-| n8n Code-node tests | CLE-01/02/03 and DFU-01/02/03 checks passed with mocked n8n globals |
-| HTTP smoke script | Passed against a running API with H2 and a local fake webhook |
-| Smoke negative paths | Missing token/unreachable API returned exit 2; wrong token returned exit 1 |
-| Live rate-limit exercise | Excess submissions returned 429 |
-| Secret scan | Passed |
-| Docker/PostgreSQL runtime | Not exercised |
-| Real n8n import and executions | Not exercised |
-| Website build/browser tests | No runtime implemented yet |
-| Remote GitHub Actions | Unconfirmed; earlier CLI lookup returned 404 |
+| HTTP smoke script | Previously passed against a running API with H2 and a local fake webhook; rerun against PostgreSQL in section 4.5 |
+| Smoke negative paths | Previously: missing token/unreachable API returned exit 2; wrong token returned exit 1 |
+| Live rate-limit exercise | Previously: excess submissions returned 429 |
+| Docker/PostgreSQL runtime | Docker unavailable; PostgreSQL verified with portable binaries (section 4.5) |
+| Real n8n import and executions | Import, credential binding and publishing verified (section 4.5); executions not exercised |
+| Website build/tests | Unit/build passed; browser-to-API, CORS and axe audit verified in section 4.5 |
 
 The smoke run found a real startup dependency cycle hidden by the test Clock override. `ClockConfig` now owns the production Clock bean, and `ProductionWiringTest` covers startup without that override. Keep this regression coverage.
 
+### 4.5 Portable integration run on the non-personal workstation (no Docker, winget or tunnels)
+
+Docker and WSL are not installed and winget is blocked by policy, so the stack was assembled from portable runtimes in the session's private folder only, with no machine-wide install or configuration change. Port 8080 was already used by an unrelated process, so the API ran on `18080`. All data was fictional; nothing was sent externally.
+
+| Runtime | How it was run |
+|---|---|
+| PostgreSQL 16.10 (Compose uses `postgres:16`) | EDB portable binaries zip; `initdb` with scram-sha-256 on `127.0.0.1:55432`; `orchbiz` and `n8n` databases |
+| Lead API | `java -jar platform\lead-api\target\lead-api.jar` with Compose-equivalent environment variables |
+| n8n 2.46.4 | `npm install n8n@2.46.4 --force --ignore-scripts` on Node 24.22.2, PostgreSQL backend, `127.0.0.1:5678` |
+| Browser | Installed Chrome driven headless by `playwright-core` plus `axe-core` (session-only script, not committed) |
+
+| Check | Result |
+|---|---|
+| Flyway on real PostgreSQL | V1 and V2 applied cleanly |
+| `lead-api-smoke.ps1 -SkipNotification` | Passed: HEALTH, AUTH, TENANT, CSL-01..04, SPAM, CLE-API, DFU-API |
+| Browser run of the Angular template against the API via the dev proxy (fictional `example-learning-studio` tenant) | 18/18 passed: render, services, title, booking manual fallback, required/email validation without POST, submission stored in PostgreSQL, reset, duplicate response, no console errors, axe WCAG 2.1 A/AA with 0 violations, honeypot accepted but not stored, cross-origin submission from an allowed origin, preflight denied for an unlisted origin, friendly tenant error (403), no horizontal overflow at 390px |
+| n8n credentials and workflow import | 4 `*_REF` credentials and all 3 blueprints imported; each node bound to the intended credential after the fix below |
+| n8n publish/restart | All 3 workflows published; after a restart n8n reported 3 published workflows and `/healthz` returned 200 |
+| CLI after changes | `mvn package` passed 16 tests; `validate-catalogue` passed |
+| Not run | Smoke with notification (NBO-01) and live NBO/CLE/DFU executions were stopped at the operator's request; they remain for the personal device |
+
+Defects found by this run and fixed in the repository:
+
+- **n8n credential binding:** the blueprints referenced credentials by name without an `id` key. On import, n8n caches by an undefined id for each credential type, so every Header Auth slot in classification and drafting was bound to the webhook credential and the admin-API and LLM calls would have sent the wrong token. Every reference now declares `"id": null`, and `validate-catalogue` rejects a credential reference without an explicit `id` key (covered by `OrchbizCliTest`).
+- **Honeypot never sent:** the form always submitted an empty `_hp`. It now reads the hidden input and clears it on reset.
+- **Accessibility:** a service link's `aria-label` did not contain its visible text (axe `label-content-name-mismatch`). It is now `Ask about this service: <name>`.
+- Two Angular unit tests were added (11 total, all passing).
+
+Notes for the personal device: Docker Compose remains the supported path. On Windows, an npm-installed n8n needs `--force --ignore-scripts` (a Linux-only optional dependency and the Kafka native module otherwise fail); the Kafka node is not used by OrchBiz, and n8n warns that running outside a container is deprecated. Under heavy machine load, Vitest worker start-up and n8n start-up timed out or took several minutes; this was environmental rather than code failure.
+
 ## 5. Personal-device bootstrap and baseline
 
-Install/verify Git, Java 17, Maven 3.9+, Node and npm, Docker with Compose, and optionally GitHub CLI. Node 22 was available on the corporate device; check the supported Node range for the Angular version selected before scaffolding.
+On the personal device, inspect Git, Java 17+, Maven 3.9+, Node/npm, Docker with Compose, and optionally GitHub CLI. The versions observed on the non-personal workstation above do not describe the personal device. Select a Node version supported by the Angular CLI before scaffolding.
 
 ```powershell
 git --version
@@ -176,6 +233,17 @@ docker compose version
 ```
 
 Do not transfer corporate proxy configuration or disable TLS verification. The npm certificate problem may not exist on the personal network. Investigate actual failures there instead of applying corporate workarounds blindly.
+
+For the website template, use Node 24 LTS (`.nvmrc`) and run its locked install, tests and build:
+
+```powershell
+Set-Location .\catalogue\websites\business-landing-page\template
+npm ci
+npm test -- --watch=false
+npm run build
+```
+
+For a local API-backed preview, `npm start` serves `http://localhost:4200` and proxies `/api` to `http://localhost:8080`. Register and activate the configured tenant first; the demo `example-learning-studio` tenant is not created automatically. The proxy does not start the API or PostgreSQL.
 
 Run the baseline before changing implementation:
 
@@ -223,7 +291,7 @@ The database initialization script creates n8n's database on first initializatio
 1. Complete local n8n owner-account setup.
 2. Create Header Auth credential `LEAD_EVENTS_WEBHOOK_HEADER_REF`, with header name `X-OrchBiz-Token` and the local webhook-token value.
 3. Import `catalogue\automations\notify-business-owner\notify-business-owner.workflow.json`.
-4. Resolve credential bindings, inspect the Code node, and retain `mode: 'dry-run'`.
+4. Resolve credential bindings, inspect the Code node, and retain `mode: 'dry-run'`. The blueprints declare `"id": null` on every credential reference so n8n binds each one by name; confirm in the editor that each node shows the intended `*_REF` credential.
 5. Resolve any SMTP credential validation needed by the imported node without sending a message. Do not activate staging email without explicit permission.
 6. Activate the workflow so its production `/webhook/` URL exists.
 7. Leave the API webhook list pointing only at this notification workflow initially.
@@ -302,11 +370,11 @@ These are continuation tasks to investigate and address with targeted tests, not
 
 ## 8. Priority 3: Build the reusable Angular website
 
-There is no website runtime to repair: it needs to be implemented using the existing module contracts.
+The public website modules now have an Angular implementation in `catalogue\websites\business-landing-page\template`. The included fixture is clearly fictional; replace it only with validated, approved artifacts when configuring a real preview.
 
 Start with the included public modules: `business-landing-page`, `services-and-pricing`, `enquiry-form`, and the approved `appointment-booking` behavior. Treat the authenticated `lead-dashboard` separately.
 
-Implementation requirements:
+Remaining implementation and integration requirements:
 
 - Render from schema-valid `site.config.json` and `website-copy.json`, not hardcoded client data.
 - Respect `enabledModules`, exact manifest versions, theme tokens, content sources and client identity.
@@ -316,10 +384,10 @@ Implementation requirements:
 - Match CORS to the preview origin; browser behavior must be tested, not inferred from HTTP smoke results.
 - Keep secrets out of public configuration, JavaScript bundles and browser storage.
 - Never fabricate testimonials, prices, accreditation, awards or performance claims.
-- Add responsive, accessible UI and browser tests for form validation and successful submission.
+- Add responsive, accessible UI and browser tests for form validation and successful submission to the repository and CI. A session-only Playwright/axe run passed (section 4.5) but is not committed; port its scenarios rather than relying on that evidence.
 - Use a supported Angular/Node combination, commit its lockfile and extend CI with the real build/test commands.
 
-**Contract mismatch to resolve before wiring the form:** `schemas\site-config.schema.json` currently restricts form field names to camelCase/alphanumeric names, while existing API tests and workflow defaults use keys such as `full_name` and `course_interest`. Align the contract and mapping deliberately across schema, manifests, tenant requirements, frontend and workflows. Do not add a one-off rename that leaves other surfaces inconsistent.
+The site field-name schema now accepts underscore and hyphen keys used by the API (including `full_name` and `course_interest`). Keep the schema, manifests, tenant requirements, frontend and workflows aligned; do not add one-off renames.
 
 The site schema also describes field validation as client/server applied, but tenant configuration does not currently store arbitrary per-field regex/length rules. Verify which rules the backend actually enforces and close or document the gap; frontend-only validation is not equivalent.
 
@@ -389,4 +457,4 @@ The next agent's handback must distinguish:
 
 ## 12. Suggested first instruction to the personal-device agent
 
-> Read `docs\personal-device-agent-handoff.md` and the canonical documents it references. Inspect this checkout and preserve existing changes. First reproduce the CLI/API/Code-node baseline, then bring up PostgreSQL, n8n and the lead API locally. Import and verify notification in dry-run mode, run the smoke test against PostgreSQL, and record actual n8n execution results. Resolve integration defects with targeted regression coverage before scaffolding the parameterized Angular website. Keep all credentials local, do not enable paid/live messaging or production deployment, and never approve human gates for me. Report the first milestone with verified outcomes and remaining gaps rather than claiming the entire package is complete.
+> Read `docs\personal-device-agent-handoff.md` and the canonical documents it references. Inspect this checkout and preserve existing changes. Reproduce the CLI/API/Code-node baseline and run the Angular template's `npm ci`, unit tests and production build with Node 24 LTS. Then, on a Docker-capable machine, bring up PostgreSQL/n8n/API, import notification in dry-run mode, run the smoke test (with notification) against PostgreSQL and record actual NBO/CLE/DFU workflow executions; section 4.5 already covers PostgreSQL migrations, API smoke checks, n8n import/publishing and a browser run without Docker. Add an in-repo browser test for the website covering CORS and responsive/accessibility behavior. Keep credentials local, do not enable paid/live messaging or production deployment, and never approve human gates for me. Report verified outcomes and remaining gaps rather than claiming the entire package is complete.

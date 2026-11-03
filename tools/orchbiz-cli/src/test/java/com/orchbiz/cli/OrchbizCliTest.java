@@ -136,6 +136,11 @@ class OrchbizCliTest {
         bp.put("active", true);
         ObjectNode webhook = (ObjectNode) bp.get("nodes").get(0);
         ((ObjectNode) webhook.get("credentials").get("httpHeaderAuth")).put("name", "my real header").put("id", "42");
+        for (var node : bp.get("nodes")) {
+            if (node.path("credentials").has("smtp")) {
+                ((ObjectNode) node.get("credentials").get("smtp")).remove("id");
+            }
+        }
         ((ObjectNode) bp.get("connections")).putObject("Ghost").putArray("main").addArray()
                 .addObject().put("node", "Nowhere").put("type", "main").put("index", 0);
         Workspace.writeJson(wf, bp);
@@ -148,10 +153,12 @@ class OrchbizCliTest {
         Path enq = tmp.resolve("catalogue/websites/enquiry-form/manifest.json");
         ObjectNode e = (ObjectNode) Workspace.readJson(enq);
         e.put("implementationStatus", "tested");
+        e.remove("implementation");
         Workspace.writeJson(enq, e);
 
         assertEquals(1, run("validate-catalogue"));
-        for (String expected : List.of("active=false", "*_REF name", "instance-specific id", "unknown node 'Ghost'",
+        for (String expected : List.of("active=false", "*_REF name", "instance-specific id", "\"id\": null",
+                "unknown node 'Ghost'",
                 "unknown node 'Nowhere'", "'platform/missing-service' does not exist",
                 "'tested' requires at least one implementation entry")) {
             assertTrue(lastOut.contains(expected), expected + "\n" + lastOut);

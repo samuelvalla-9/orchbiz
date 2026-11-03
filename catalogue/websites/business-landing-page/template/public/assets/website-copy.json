@@ -1,0 +1,46 @@
+{
+  "clientSlug": "example-learning-studio",
+  "hero": {
+    "headline": "A fictional learning studio demo",
+    "subheadline": "This sample page uses demonstration content only. Replace it with approved, verified client copy before any real use.",
+    "primaryCta": "Send an enquiry",
+    "secondaryCta": "View sample services"
+  },
+  "services": [
+    {
+      "name": "Foundation learning (demo)",
+      "description": "A fictional example service card. No real course, outcome, duration, or price is represented."
+    },
+    {
+      "name": "One-to-one sessions (demo)",
+      "description": "A second fictional example showing how approved service information is rendered from configuration."
+    }
+  ],
+  "differentiators": [],
+  "testimonials": [],
+  "faq": [
+    {
+      "question": "Is this a real business?",
+      "answer": "No. This is a fictional demonstration. All sample names and service details are placeholders.",
+      "source": "suggested-needs-client-approval"
+    }
+  ],
+  "about": {
+    "heading": "About this demo",
+    "body": "The page is rendered from JSON configuration and copy files. Replace both with schema-validated, client-approved artifacts for a real deployment."
+  },
+  "enquiryCta": {
+    "headline": "Start a conversation",
+    "body": "The form sends enquiries to the configured lead API. The example API tenant must be configured before a submission can be accepted.",
+    "buttonLabel": "Send enquiry",
+    "successMessage": "Thank you. Your demonstration enquiry has been received."
+  },
+  "footer": {
+    "businessName": "Example Learning Studio (fictional)",
+    "legalNote": "Fictional demo content. Not a real service or business."
+  },
+  "seo": {
+    "title": "Example Learning Studio | Fictional Demo",
+    "description": "A fictional sample website used to demonstrate the OrchBiz reusable website template."
+  }
+}

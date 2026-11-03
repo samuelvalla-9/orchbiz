@@ -631,6 +631,11 @@ public final class Commands {
                     if (!c.getValue().path("id").asText("").isEmpty()) {
                         errors.add(rel + ": node '" + name + "' credential '" + c.getKey()
                                 + "' must not carry an instance-specific id.");
+                    } else if (!c.getValue().has("id")) {
+                        // n8n only resolves a reference by name when id is explicitly null; a missing id makes
+                        // the importer bind every credential of the same type to a single credential.
+                        errors.add(rel + ": node '" + name + "' credential '" + c.getKey()
+                                + "' must declare \"id\": null so n8n resolves it by name on import.");
                     }
                 }
             }

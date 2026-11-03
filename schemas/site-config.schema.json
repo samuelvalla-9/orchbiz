@@ -61,7 +61,11 @@
             "type": "object",
             "required": ["name", "label", "type", "required", "validation"],
             "properties": {
-              "name": { "type": "string", "pattern": "^[a-zA-Z][a-zA-Z0-9]*$" },
+              "name": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+                "description": "Field key sent unchanged to the lead API; supports letters, digits, underscore and hyphen."
+              },
               "label": { "type": "string" },
               "type": { "enum": ["text", "email", "tel", "select", "textarea", "date", "checkbox"] },
               "required": { "type": "boolean" },

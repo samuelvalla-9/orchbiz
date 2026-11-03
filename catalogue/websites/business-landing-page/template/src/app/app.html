@@ -1,0 +1,205 @@
+@if (loading) {
+  <main class="state-page" aria-live="polite">Loading website…</main>
+} @else if (configError) {
+  <main class="state-page" role="alert">{{ configError }}</main>
+} @else if (config && copy) {
+  <header class="site-header">
+    <a class="wordmark" href="#top" aria-label="{{ copy.footer.businessName }} home">
+      @if (config.assets?.logoUrl) {
+        <img [src]="config.assets?.logoUrl" [alt]="copy.footer.businessName" />
+      } @else {
+        {{ copy.footer.businessName }}
+      }
+    </a>
+    <nav aria-label="Main navigation">
+      @if (hasModule('services-and-pricing')) {
+        <a href="#services">Services</a>
+      }
+      <a href="#enquiry">{{ copy.enquiryCta.buttonLabel }}</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    @if (hasModule('business-landing-page')) {
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">{{ copy.footer.businessName }}</p>
+          <h1>{{ copy.hero.headline }}</h1>
+          <p class="hero-description">{{ copy.hero.subheadline }}</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#enquiry">{{ copy.hero.primaryCta }}</a>
+            @if (copy.hero.secondaryCta) {
+              <a class="button button-secondary" href="#services">{{ copy.hero.secondaryCta }}</a>
+            }
+          </div>
+        </div>
+        <div class="hero-mark" aria-hidden="true"><span>O</span></div>
+      </section>
+
+      @if (copy.about?.heading || copy.about?.body) {
+        <section class="about section-wrap">
+          @if (copy.about?.heading) { <h2>{{ copy.about?.heading }}</h2> }
+          @if (copy.about?.body) { <p>{{ copy.about?.body }}</p> }
+        </section>
+      }
+
+      @if (copy.differentiators.length) {
+        <section class="section-wrap differentiators" aria-labelledby="approach-title">
+          <p class="eyebrow">Our approach</p>
+          <h2 id="approach-title">A thoughtful next step</h2>
+          <div class="feature-grid">
+            @for (item of copy.differentiators; track item.title) {
+              <article class="feature-card">
+                <span class="feature-dot" aria-hidden="true"></span>
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.description }}</p>
+              </article>
+            }
+          </div>
+        </section>
+      }
+    }
+
+    @if (hasModule('services-and-pricing')) {
+      <section id="services" class="section-wrap services" aria-labelledby="services-title">
+        <p class="eyebrow">Explore your options</p>
+        <h2 id="services-title">Services</h2>
+        <div class="service-grid">
+          @for (service of copy.services; track service.name) {
+            <article class="service-card">
+              <h3>{{ service.name }}</h3>
+              <p>{{ service.description }}</p>
+              @if (service.audience) { <p class="service-detail">{{ service.audience }}</p> }
+              @if (service.duration) { <p class="service-detail">{{ service.duration }}</p> }
+              @if (service.price) { <p class="service-price">{{ service.price }}</p> }
+              <a class="text-link" href="#enquiry" [attr.aria-label]="'Ask about this service: ' + service.name">
+                Ask about this service <span aria-hidden="true">→</span>
+              </a>
+            </article>
+          }
+        </div>
+      </section>
+    }
+
+    @if (copy.testimonials.length) {
+      <section class="section-wrap testimonials" aria-labelledby="testimonials-title">
+        <p class="eyebrow">In their words</p>
+        <h2 id="testimonials-title">Experiences</h2>
+        <div class="quote-grid">
+          @for (quote of copy.testimonials; track quote.attribution) {
+            <figure class="quote-card">
+              <blockquote>{{ quote.quote }}</blockquote>
+              <figcaption>{{ quote.attribution }}</figcaption>
+            </figure>
+          }
+        </div>
+      </section>
+    }
+
+    @if (copy.faq.length) {
+      <section class="section-wrap faq" aria-labelledby="faq-title">
+        <p class="eyebrow">Helpful details</p>
+        <h2 id="faq-title">Frequently asked questions</h2>
+        @for (item of copy.faq; track item.question) {
+          <details>
+            <summary>{{ item.question }}</summary>
+            <p>{{ item.answer }}</p>
+          </details>
+        }
+      </section>
+    }
+
+    @if (hasModule('appointment-booking') && config.booking.type === 'Calendly Link' && bookingLink()) {
+      <section class="booking-callout">
+        <div>
+          <p class="eyebrow">Plan a conversation</p>
+          <h2>Choose a time to connect</h2>
+        </div>
+        <a class="button button-light" [href]="bookingLink()" target="_blank" rel="noopener noreferrer">
+          Open booking page <span class="visually-hidden">(opens in a new tab)</span>
+        </a>
+      </section>
+    }
+
+    @if (hasModule('enquiry-form')) {
+      <section id="enquiry" class="enquiry-section">
+        <div class="enquiry-intro">
+          <p class="eyebrow">Get in touch</p>
+          <h2>{{ copy.enquiryCta.headline }}</h2>
+          @if (copy.enquiryCta.body) { <p>{{ copy.enquiryCta.body }}</p> }
+        </div>
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          @for (field of config.enquiryForm.fields; track field.name) {
+            <div class="form-field" [class.checkbox-field]="field.type === 'checkbox'">
+              @if (field.type === 'textarea') {
+                <label [for]="field.name">{{ field.label }} @if (field.required) { <span aria-hidden="true">*</span> }</label>
+                <textarea [id]="field.name" [formControlName]="field.name" [required]="field.required"
+                  [attr.maxlength]="field.validation?.maxLength ?? null"
+                  [attr.aria-invalid]="!!fieldError(field)"
+                  [attr.aria-describedby]="fieldError(field) ? field.name + '-error' : null"></textarea>
+              } @else if (field.type === 'select') {
+                <label [for]="field.name">{{ field.label }} @if (field.required) { <span aria-hidden="true">*</span> }</label>
+                <select [id]="field.name" [formControlName]="field.name" [required]="field.required"
+                  [attr.aria-invalid]="!!fieldError(field)"
+                  [attr.aria-describedby]="fieldError(field) ? field.name + '-error' : null">
+                  <option value="">Choose an option</option>
+                  @for (option of field.options ?? []; track option) { <option [value]="option">{{ option }}</option> }
+                </select>
+              } @else if (field.type === 'checkbox') {
+                <input [id]="field.name" type="checkbox" [formControlName]="field.name" [required]="field.required"
+                  [attr.aria-invalid]="!!fieldError(field)"
+                  [attr.aria-describedby]="fieldError(field) ? field.name + '-error' : null" />
+                <label [for]="field.name">{{ field.label }} @if (field.required) { <span aria-hidden="true">*</span> }</label>
+              } @else {
+                <label [for]="field.name">{{ field.label }} @if (field.required) { <span aria-hidden="true">*</span> }</label>
+                <input [id]="field.name" [type]="field.type" [formControlName]="field.name"
+                  [required]="field.required" [attr.minlength]="field.validation?.minLength ?? null"
+                  [attr.maxlength]="field.validation?.maxLength ?? null"
+                  [attr.pattern]="field.validation?.pattern ?? null"
+                  [attr.aria-invalid]="!!fieldError(field)"
+                  [attr.aria-describedby]="fieldError(field) ? field.name + '-error' : null" />
+              }
+              @if (fieldError(field)) {
+                <p class="field-error" [id]="field.name + '-error'">{{ fieldError(field) }}</p>
+              }
+            </div>
+          }
+          <div class="honeypot" aria-hidden="true">
+            <label for="website-url">Leave this field empty</label>
+            <input #honeypot id="website-url" name="website-url" tabindex="-1" autocomplete="off" />
+          </div>
+          @if (config.enquiryForm.consentText) {
+            <p class="consent-copy">{{ config.enquiryForm.consentText }}</p>
+          }
+          @if (submissionError) {
+            <p class="form-status error-status" role="alert">{{ submissionError }}</p>
+          }
+          @if (submissionNotice) {
+            <p class="form-status success-status" role="status">{{ submissionNotice }}</p>
+          }
+          @if (submitted && !submissionNotice) {
+            <p class="form-status success-status" role="status">
+              {{ copy.enquiryCta.successMessage || 'Thank you. Your enquiry has been received.' }}
+            </p>
+          }
+          <button class="button button-primary submit-button" type="submit" [disabled]="submitting">
+            {{ submitting ? 'Sending…' : copy.enquiryCta.buttonLabel }}
+          </button>
+        </form>
+      </section>
+    }
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <a class="wordmark footer-wordmark" href="#top">{{ copy.footer.businessName }}</a>
+      @if (copy.footer.location) { <p>{{ copy.footer.location }}</p> }
+      @if (copy.footer.hours) { <p>{{ copy.footer.hours }}</p> }
+    </div>
+    <div class="footer-contact">
+      @if (copy.footer.contactEmail) { <a [href]="'mailto:' + copy.footer.contactEmail">{{ copy.footer.contactEmail }}</a> }
+      @if (copy.footer.contactPhone) { <a [href]="'tel:' + copy.footer.contactPhone">{{ copy.footer.contactPhone }}</a> }
+      @if (copy.footer.legalNote) { <p>{{ copy.footer.legalNote }}</p> }
+    </div>
+  </footer>
+}

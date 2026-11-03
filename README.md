@@ -14,7 +14,7 @@ Instead of treating every client engagement as a bespoke build from scratch, **O
 |---|---|
 | Delivery tooling | Java CLI for CSV/XLSX intake, schema validation, scope/budget checks, human gates and secret scanning |
 | Lead API | Lead capture, validation, dedupe, rate limiting, event dispatch, classification write-back and draft storage; tested with H2 |
-| Automation workflows | Three n8n blueprints: owner notification, enquiry classification and follow-up drafting; real n8n execution remains unverified |
+| Automation workflows | Three n8n blueprints: owner notification, enquiry classification and follow-up drafting; import and publishing verified in n8n 2.46.4; real executions remain unverified |
 | Website and staff access | Catalogue contracts only; Angular runtime, staff authentication and dashboard remain to be built |
 | Appointments and reminders | Contracts only; not implemented |
 | Local deployment | Compose definition exists; Docker/PostgreSQL runtime verification remains outstanding |
@@ -23,6 +23,7 @@ The **proposed MVP** is a narrower enquiry-to-review pilot: a branded enquiry we
 
 - [How the system works, owner workflow and MVP acceptance criteria](docs/system-operating-model-and-mvp.md)
 - [Personal-device agent handoff and development priorities](docs/personal-device-agent-handoff.md)
+- [Manual test runbook for any developer device](docs/manual-test-runbook.md)
 - [Setup, trial run and capability matrix](docs/orchbiz-setup-and-trial-run-guide.md)
 - [Kids colouring book generation prompt (standalone, not part of OrchBiz)](docs/kids-colouring-book-generation-prompt.md)
 

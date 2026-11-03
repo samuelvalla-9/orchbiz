@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "category": "website",
   "purpose": "Lets prospects pick a demo or counselling slot within business hours, either via an embedded Calendly/Google appointment page or a built-in slot request form.",
-  "implementationStatus": "contract-only",
+  "implementationStatus": "in-development",
   "inputSchema": {
     "type": "object",
     "required": ["booking"],
@@ -47,8 +47,15 @@
     { "id": "APB-03", "description": "Calendly Link mode renders embed", "expectedOutcome": "Embed loads; no API calls made from the site" }
   ],
   "knownLimitations": [
-    "Contract only: Angular implementation not yet built (Phase B).",
+    "Website supports a safe external Calendly-style HTTPS link and manual follow-up only; built-in, Google Calendar and automated scheduling are not implemented.",
     "Built-in mode creates requests, not confirmed bookings; staff confirm in the calendar."
   ],
-  "rollbackApproach": "Switch booking.type to 'Manual Follow-up Only' in site.config.json and redeploy."
+  "rollbackApproach": "Switch booking.type to 'Manual Follow-up Only' in site.config.json and redeploy.",
+  "implementation": [
+    {
+      "kind": "angular-component",
+      "path": "catalogue/websites/business-landing-page/template/src/app/app.html",
+      "verifiedBy": "Angular unit tests and production build in CI; scheduling integration is not implemented"
+    }
+  ]
 }

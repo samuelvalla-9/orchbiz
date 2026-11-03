@@ -5,7 +5,7 @@
   "purpose": "Prepares a personalised, brand-aligned follow-up email or WhatsApp draft from approved message templates and stores it for staff approval before any sending.",
   "implementationStatus": "in-development",
   "implementation": [
-    { "kind": "n8n-workflow", "path": "catalogue/automations/draft-follow-up/draft-follow-up.workflow.json", "verifiedBy": "partial: Code-node logic tested by tools/workflow-tests/code-nodes.test.js; not yet imported into a running n8n instance" },
+    { "kind": "n8n-workflow", "path": "catalogue/automations/draft-follow-up/draft-follow-up.workflow.json", "verifiedBy": "partial: Code-node logic tested by tools/workflow-tests/code-nodes.test.js; imported into npm-installed n8n 2.46.4 on PostgreSQL with correct per-node credential binding and published; live executions not yet verified" },
     { "kind": "service", "path": "platform/lead-api", "verifiedBy": "POST/GET /drafts validated by AutomationApiTest (mvn package)" }
   ],
   "inputSchema": {
@@ -48,7 +48,7 @@
     { "id": "DFU-03", "description": "autoSend set to true in config", "expectedOutcome": "Workflow refuses to start and reports a configuration error" }
   ],
   "knownLimitations": [
-    "Blueprint not yet imported into a running n8n instance; templates and CONFIG in 'Prepare draft' are edited after import.",
+    "Imported and published in n8n 2.46.4 but no live execution has been verified yet; templates and CONFIG in 'Prepare draft' are edited after import.",
     "There is no approval UI yet: drafts are listed via GET /api/admin/tenants/{tenantId}/leads/{leadId}/drafts until the lead dashboard exists.",
     "Drafts must be approved in the lead dashboard or by email reply."
   ],

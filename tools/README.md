@@ -2,6 +2,10 @@
 
 Deterministic checks that back the agent pipeline ("AI proposes, code validates").
 
+For step-by-step manual execution of all current test layers, including local
+PostgreSQL/n8n and browser checks, see the [manual test runbook](../docs/manual-test-runbook.md).
+Prefer running heavy suites in your own terminal rather than through an agent.
+
 ## Requirements
 - Java 17+ and Maven 3.9+ on `PATH`. The first run of `tools\orchbiz.ps1` builds `tools/orchbiz-cli/target/orchbiz-cli.jar` and rebuilds it when sources change.
 

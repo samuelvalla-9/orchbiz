@@ -5,7 +5,7 @@
   "purpose": "Lead API (platform/lead-api) that validates an enquiry payload against the tenant's form config, normalises phone/email, deduplicates by tenant + contact, persists the lead in PostgreSQL and emits a lead.created event to n8n via an outbox.",
   "implementationStatus": "in-development",
   "implementation": [
-    { "kind": "service", "path": "platform/lead-api", "verifiedBy": "mvn package: LeadApiTest and EventDispatcherTest cover CSL-01..04 on H2 (PostgreSQL mode); not yet run against real PostgreSQL" }
+    { "kind": "service", "path": "platform/lead-api", "verifiedBy": "mvn package: LeadApiTest and EventDispatcherTest cover CSL-01..04 on H2 (PostgreSQL mode); Flyway V1/V2 and tools/smoke/lead-api-smoke.ps1 (API checks, -SkipNotification) also passed against portable PostgreSQL 16.10 without Docker" }
   ],
   "inputSchema": {
     "type": "object",

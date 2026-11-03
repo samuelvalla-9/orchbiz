@@ -156,9 +156,9 @@ This is the smallest coherent pilot proposed here. It validates whether you can 
 |---|---|---|
 | Delivery process | Intake, validated scope/budget, two owner gates, QA evidence and handover | Tooling/contracts exist; end-to-end engagement still needs exercising |
 | Public website | Branded landing content, services, accessible enquiry form and clear outcomes | Module contracts only |
-| Lead capture | Required-field validation, tenant checks, dedupe, spam trap and rate limiting | API implemented; real PostgreSQL integration not verified |
+| Lead capture | Required-field validation, tenant checks, dedupe, spam trap and rate limiting | API implemented; migrations and smoke checks passed on portable PostgreSQL 16.10; Compose stack not run |
 | Persistence | Leads/events/drafts survive restart; backup and restore demonstrated | Migrations exist; runtime/restore evidence missing |
-| Internal notification | One supported channel, dry-run locally and an explicitly approved staff test in staging | Email blueprint exists; actual n8n/SMTP execution unverified |
+| Internal notification | One supported channel, dry-run locally and an explicitly approved staff test in staging | Email blueprint imported and published in n8n 2.46.4; actual n8n/SMTP execution unverified |
 | Follow-up draft | Approved template draft stored awaiting review; no automatic sending | API and blueprint exist; integration needs exercising |
 | Staff review | Authenticated, tenant-restricted lead/draft view | Auth and dashboard not implemented |
 | Operations | Reproducible preview, visible failure handling, deployment/rollback instructions | Partial tooling and Compose definition |
@@ -246,6 +246,10 @@ Measure actual delivery effort, defects, support incidents and recurring service
 
 ## 8. Present-day status and next action
 
-Today the repository has working Java validation tooling, a tested lead API and three unverified-at-runtime n8n blueprints. It does not yet have a working Angular website, secure staff dashboard, appointment system or production installation.
+The code-level baseline was rerun on a non-personal Windows workstation on 2026-11-03: CLI (16 tests), lead API (28 tests), catalogue validation, n8n Code-node tests and the secret scan all passed. The latest GitHub Actions run for `GH-Copilot_Setup` at `8f75de4` also completed successfully. These checks do not verify a personal device or live integrations.
+
+The inspected machine's system Node 25.9.0 is unsupported by Angular CLI 21.2.11. An isolated Node 24.22.2 LTS runtime was downloaded to session storage instead; with it, the Angular website template at `catalogue/websites/business-landing-page/template` passes its unit suite and production build. Its fictional config and copy pass the OrchBiz CLI schemas. Docker is unavailable on that machine, so portable PostgreSQL 16.10 and an npm-installed n8n 2.46.4 were used instead: migrations and API smoke checks passed, a headless-Chrome run of the site against the API passed (submission, CORS, axe WCAG 2.1 A/AA, mobile layout), and the blueprints were imported and published after fixing a credential-binding defect. n8n executions, the Compose stack, a committed browser suite and preview packaging remain. Install Node 24 LTS on the personal device before continuing the web work.
+
+The repository does not yet have a release-ready, client-configured Angular website, secure staff dashboard, appointment system or production installation.
 
 The immediate next engineering milestone is **Milestone A**, followed by **Milestone B**. The personal-device handoff supplies the detailed continuation instructions. This document defines the intended operating model and proposed MVP; it does not certify that the MVP is built, approved or ready to sell.

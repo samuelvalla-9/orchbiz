@@ -5,7 +5,7 @@
   "purpose": "Uses a narrowly scoped LLM extraction call to tag each enquiry with intent, urgency and service interest, validated against a fixed label set before saving.",
   "implementationStatus": "in-development",
   "implementation": [
-    { "kind": "n8n-workflow", "path": "catalogue/automations/classify-enquiry/classify-enquiry.workflow.json", "verifiedBy": "partial: Code-node logic tested by tools/workflow-tests/code-nodes.test.js; not yet imported into a running n8n instance" },
+    { "kind": "n8n-workflow", "path": "catalogue/automations/classify-enquiry/classify-enquiry.workflow.json", "verifiedBy": "partial: Code-node logic tested by tools/workflow-tests/code-nodes.test.js; imported into npm-installed n8n 2.46.4 on PostgreSQL with correct per-node credential binding and published; live executions not yet verified" },
     { "kind": "service", "path": "platform/lead-api", "verifiedBy": "PUT /classification validated by AutomationApiTest (mvn package)" }
   ],
   "inputSchema": {
@@ -47,7 +47,7 @@
     { "id": "CLE-03", "description": "LLM provider timeout", "expectedOutcome": "Lead remains stored; classification marked pending; no crash" }
   ],
   "knownLimitations": [
-    "Blueprint not yet imported into a running n8n instance; CONFIG constants in 'Prepare classification' are edited after import.",
+    "Imported and published in n8n 2.46.4 but no live execution has been verified yet; CONFIG constants in 'Prepare classification' are edited after import.",
     "Uses the full lead-API admin token for write-back; a scoped automation token is future work.",
     "Event de-duplication uses n8n workflow static data (last 500 event IDs), which only persists for active production executions.",
     "English-only prompt; mixed-language messages may get lower confidence."

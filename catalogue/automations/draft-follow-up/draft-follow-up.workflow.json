@@ -30,6 +30,7 @@
       },
       "credentials": {
         "httpHeaderAuth": {
+          "id": null,
           "name": "LEAD_EVENTS_WEBHOOK_HEADER_REF"
         }
       }
@@ -148,6 +149,7 @@
       },
       "credentials": {
         "httpHeaderAuth": {
+          "id": null,
           "name": "LLM_API_REF"
         }
       },
@@ -191,6 +193,7 @@
       },
       "credentials": {
         "httpHeaderAuth": {
+          "id": null,
           "name": "ORCHBIZ_ADMIN_API_REF"
         }
       }
