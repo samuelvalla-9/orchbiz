@@ -1,10 +1,7 @@
 package com.orchbiz.leadapi.config;
 
-import java.time.Clock;
 import java.util.List;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -25,12 +22,6 @@ public class WebConfig implements WebMvcConfigurer {
         this.properties = properties;
         this.adminAuthInterceptor = adminAuthInterceptor;
         this.rateLimitInterceptor = rateLimitInterceptor;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public Clock clock() {
-        return Clock.systemUTC();
     }
 
     @Override

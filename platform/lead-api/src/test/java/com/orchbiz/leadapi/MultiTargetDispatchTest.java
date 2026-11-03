@@ -15,6 +15,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 import com.orchbiz.leadapi.events.EventDispatcher;
+import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
 /** One event fanned out to notify-business-owner and classify-enquiry webhooks. */
@@ -30,9 +31,18 @@ class MultiTargetDispatchTest extends AbstractApiTest {
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
-        SERVER.createContext("/notify", ex -> { HITS.add("notify"); ex.sendResponseHeaders(200, -1); ex.close(); });
-        SERVER.createContext("/classify", ex -> { HITS.add("classify"); ex.sendResponseHeaders(SECOND_CODE.get(), -1); ex.close(); });
+        SERVER.createContext("/notify", ex -> respond(ex, "notify", 200));
+        SERVER.createContext("/classify", ex -> respond(ex, "classify", SECOND_CODE.get()));
         SERVER.start();
+    }
+
+    private static void respond(HttpExchange ex, String name, int code) throws IOException {
+        try (var in = ex.getRequestBody()) {
+            in.readAllBytes();
+        }
+        HITS.add(name);
+        ex.sendResponseHeaders(code, -1);
+        ex.close();
     }
 
     @DynamicPropertySource
