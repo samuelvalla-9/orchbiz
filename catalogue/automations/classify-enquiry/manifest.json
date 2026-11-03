@@ -1,9 +1,13 @@
 {
   "id": "classify-enquiry",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "automation",
   "purpose": "Uses a narrowly scoped LLM extraction call to tag each enquiry with intent, urgency and service interest, validated against a fixed label set before saving.",
-  "implementationStatus": "contract-only",
+  "implementationStatus": "in-development",
+  "implementation": [
+    { "kind": "n8n-workflow", "path": "catalogue/automations/classify-enquiry/classify-enquiry.workflow.json", "verifiedBy": "partial: Code-node logic tested by tools/workflow-tests/code-nodes.test.js; not yet imported into a running n8n instance" },
+    { "kind": "service", "path": "platform/lead-api", "verifiedBy": "PUT /classification validated by AutomationApiTest (mvn package)" }
+  ],
   "inputSchema": {
     "type": "object",
     "required": ["leadId", "tenantId", "message"],
@@ -30,7 +34,10 @@
     { "key": "serviceNames", "type": "array", "required": true, "description": "From services-and-pricing; constrains serviceInterest" },
     { "key": "llmCredentialRef", "type": "credential-ref", "required": true, "description": "LLM_API_REF" },
     { "key": "model", "type": "string", "required": true, "description": "Small, low-cost model name" },
-    { "key": "minConfidence", "type": "number", "required": false, "default": 0.6, "description": "Below this, label as 'other' and flag for staff review" }
+    { "key": "minConfidence", "type": "number", "required": false, "default": 0.6, "description": "Below this, label as 'other' and flag for staff review" },
+    { "key": "aiDataConsent", "type": "boolean", "required": true, "default": false, "description": "Copy from intake ai_data_consent; while false no text is sent to the LLM and leads are stored as pending" },
+    { "key": "webhookHeaderCredentialRef", "type": "credential-ref", "required": true, "description": "LEAD_EVENTS_WEBHOOK_HEADER_REF: Header Auth for the classify and draft-follow-up webhooks" },
+    { "key": "adminApiCredentialRef", "type": "credential-ref", "required": true, "description": "ORCHBIZ_ADMIN_API_REF: Header Auth (Authorization: Bearer <admin token>) for the lead API write-back" }
   ],
   "estimatedMonthlyCostUSD": 1,
   "permissionsRequired": ["Send enquiry text to the configured LLM provider (requires intake ai_data_consent=true)"],
@@ -40,7 +47,9 @@
     { "id": "CLE-03", "description": "LLM provider timeout", "expectedOutcome": "Lead remains stored; classification marked pending; no crash" }
   ],
   "knownLimitations": [
-    "Contract only: n8n blueprint JSON not yet built and exported (Phase B).",
+    "Blueprint not yet imported into a running n8n instance; CONFIG constants in 'Prepare classification' are edited after import.",
+    "Uses the full lead-API admin token for write-back; a scoped automation token is future work.",
+    "Event de-duplication uses n8n workflow static data (last 500 event IDs), which only persists for active production executions.",
     "English-only prompt; mixed-language messages may get lower confidence."
   ],
   "rollbackApproach": "Deactivate the workflow; leads continue without tags and staff triage manually."

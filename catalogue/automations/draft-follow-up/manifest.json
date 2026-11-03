@@ -1,9 +1,13 @@
 {
   "id": "draft-follow-up",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "automation",
   "purpose": "Prepares a personalised, brand-aligned follow-up email or WhatsApp draft from approved message templates and stores it for staff approval before any sending.",
-  "implementationStatus": "contract-only",
+  "implementationStatus": "in-development",
+  "implementation": [
+    { "kind": "n8n-workflow", "path": "catalogue/automations/draft-follow-up/draft-follow-up.workflow.json", "verifiedBy": "partial: Code-node logic tested by tools/workflow-tests/code-nodes.test.js; not yet imported into a running n8n instance" },
+    { "kind": "service", "path": "platform/lead-api", "verifiedBy": "POST/GET /drafts validated by AutomationApiTest (mvn package)" }
+  ],
   "inputSchema": {
     "type": "object",
     "required": ["leadId", "tenantId", "classification"],
@@ -30,7 +34,11 @@
     { "key": "messageTemplates", "type": "object", "required": true, "description": "From deliverables/content/message-templates.md, approved by the client" },
     { "key": "llmCredentialRef", "type": "credential-ref", "required": true, "description": "LLM_API_REF" },
     { "key": "autoSend", "type": "boolean", "required": true, "default": false, "description": "Must remain false; sending is done by send-approved-reminder or staff" },
-    { "key": "forbiddenClaims", "type": "array", "required": false, "description": "Phrases the draft must never contain (results, guarantees)" }
+    { "key": "forbiddenClaims", "type": "array", "required": false, "description": "Phrases the draft must never contain (results, guarantees)" },
+    { "key": "useLlm", "type": "boolean", "required": false, "default": false, "description": "Optional LLM personalisation; requires aiDataConsent=true. The approved template is always the fallback" },
+    { "key": "aiDataConsent", "type": "boolean", "required": true, "default": false, "description": "Copy from intake ai_data_consent" },
+    { "key": "webhookHeaderCredentialRef", "type": "credential-ref", "required": true, "description": "LEAD_EVENTS_WEBHOOK_HEADER_REF" },
+    { "key": "adminApiCredentialRef", "type": "credential-ref", "required": true, "description": "ORCHBIZ_ADMIN_API_REF: Header Auth for saving drafts to the lead API" }
   ],
   "estimatedMonthlyCostUSD": 2,
   "permissionsRequired": ["Send enquiry text to the configured LLM provider (requires intake ai_data_consent=true)", "Write drafts to the tenant's follow_up_drafts table"],
@@ -40,7 +48,8 @@
     { "id": "DFU-03", "description": "autoSend set to true in config", "expectedOutcome": "Workflow refuses to start and reports a configuration error" }
   ],
   "knownLimitations": [
-    "Contract only: n8n blueprint JSON not yet built and exported (Phase B).",
+    "Blueprint not yet imported into a running n8n instance; templates and CONFIG in 'Prepare draft' are edited after import.",
+    "There is no approval UI yet: drafts are listed via GET /api/admin/tenants/{tenantId}/leads/{leadId}/drafts until the lead dashboard exists.",
     "Drafts must be approved in the lead dashboard or by email reply."
   ],
   "rollbackApproach": "Deactivate the workflow; staff use the static message templates manually."

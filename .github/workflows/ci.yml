@@ -29,5 +29,12 @@ jobs:
       - name: Validate catalogue (manifests, packages, implementation pointers, n8n blueprints)
         run: java -jar tools/orchbiz-cli/target/orchbiz-cli.jar validate-catalogue
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: n8n Code-node logic tests (no npm dependencies)
+        run: node tools/workflow-tests/code-nodes.test.js
+
       - name: Scan repository for secrets
         run: java -jar tools/orchbiz-cli/target/orchbiz-cli.jar scan-secrets .
