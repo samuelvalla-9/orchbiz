@@ -28,6 +28,18 @@ Git Bash / POSIX: `tools/orchbiz <command>`. Commands run relative to the worksp
 
 Exit codes: `0` passed, `1` check failed / blocked, `2` usage or environment error.
 
+## Smoke and workflow tests
+
+```powershell
+$env:ORCHBIZ_ADMIN_TOKEN = '<value from your local .env>'
+.\tools\smoke\lead-api-smoke.ps1 -BaseUrl http://localhost:8080 [-SkipNotification]
+node tools/workflow-tests/code-nodes.test.js
+```
+
+`lead-api-smoke.ps1` runs against a running lead API (local, Docker Compose or staging, never production). It checks health, admin auth, CSL-01..04, the honeypot, the classification/draft write-back endpoints and, unless `-SkipNotification` is set, that the `lead.created` event reaches the webhook (`notificationStatus` = `SENT`). It uses the `smoke-test-tenant` tenant. Exit codes follow the CLI: `0`, `1`, `2`. Save its output in `clients/<slug>/qa/evidence/` when you use it as QA evidence.
+
+`code-nodes.test.js` uses only Node built-ins (no npm). It runs the JavaScript inside the n8n Code nodes of `classify-enquiry` and `draft-follow-up` with mocked n8n globals and checks CLE-01/02/03 and DFU-01/02/03.
+
 ## Pre-commit hook
 
 ```powershell
@@ -44,4 +56,4 @@ mvn -f tools/orchbiz-cli/pom.xml package     # compile + run tests + build the j
 
 Tests in `tools/orchbiz-cli/src/test` copy the real `intake/`, `catalogue/`, `schemas/`, `clients/_template/` and `platform/` (without `target/`) into a temp folder and exercise every command against the sample intake.
 
-CI (`.github/workflows/ci.yml`) builds and tests this CLI and `platform/lead-api`, then runs `validate-catalogue` and `scan-secrets .` on every push and pull request.
+CI (`.github/workflows/ci.yml`) builds and tests this CLI and `platform/lead-api`, then runs `validate-catalogue`, the n8n Code-node tests and `scan-secrets .` on every push and pull request.

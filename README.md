@@ -120,7 +120,7 @@ orchbiz/
 │   ├── websites/                      # Website module manifests (contract-only, v0.1.0)
 │   └── automations/                   # Automation manifests + n8n blueprints (*.workflow.json)
 ├── platform/
-│   ├── lead-api/                      # Spring Boot lead API: POST /api/leads, Postgres, n8n event outbox
+│   ├── lead-api/                      # Spring Boot lead API: leads, rate limit, n8n event outbox, classification/draft write-back
 │   └── local/postgres-init/           # DB bootstrap used by docker-compose
 ├── docker-compose.yml                 # Local stack: PostgreSQL + n8n + lead API (copy .env.example → .env)
 ├── .env.example                       # Placeholder variables for the local stack (never commit .env)
@@ -130,6 +130,8 @@ orchbiz/
 │   ├── README.md                      # OrchBiz CLI commands, exit codes & hook install
 │   ├── orchbiz.ps1 / orchbiz          # CLI wrappers (build the jar on first run)
 │   ├── orchbiz-cli/                   # Java 17 / Maven source and tests for the CLI
+│   ├── smoke/lead-api-smoke.ps1       # End-to-end HTTP smoke test for a running lead API
+│   ├── workflow-tests/                # Node-only tests for n8n Code-node logic
 │   └── hooks/pre-commit               # Blocks client files and secrets from being committed
 ├── agents/
 │   ├── README.md                      # Agent roster & responsibilities

@@ -60,7 +60,10 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       ORCHBIZ_ADMIN_TOKEN: ${ORCHBIZ_ADMIN_TOKEN:?set in .env}
       ORCHBIZ_ALLOWED_ORIGINS: ${ORCHBIZ_ALLOWED_ORIGINS:-http://localhost:4200}
-      LEAD_EVENTS_WEBHOOK_URL: http://n8n:5678/webhook/orchbiz/lead-events
+      # Comma-separated. Add ",http://n8n:5678/webhook/orchbiz/classify-enquiry" via .env only after that workflow is
+      # imported and ACTIVE: an inactive webhook returns 404, which keeps every event retrying for all targets.
+      LEAD_EVENTS_WEBHOOK_URL: ${LEAD_EVENTS_WEBHOOK_URL:-http://n8n:5678/webhook/orchbiz/lead-events}
+      ORCHBIZ_RATE_LIMIT_PER_MINUTE: ${ORCHBIZ_RATE_LIMIT_PER_MINUTE:-30}
       LEAD_EVENTS_WEBHOOK_TOKEN: ${LEAD_EVENTS_WEBHOOK_TOKEN:?set in .env}
     ports:
       - "127.0.0.1:8080:8080"
