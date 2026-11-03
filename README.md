@@ -1,18 +1,39 @@
 # OrchBiz — Reusable AI Service Delivery Platform
 
-**OrchBiz** is a modular, multi-agent service delivery architecture designed to turn structured customer briefs into tested, production-ready web and workflow automation systems.
+**OrchBiz** is an agent-assisted delivery workspace for a business automation services business. Its goal is to turn structured customer briefs into reusable, tested website and workflow systems, with the owner controlling scope and release.
 
 Instead of treating every client engagement as a bespoke build from scratch, **OrchBiz** combines a **Structured Intake Schema**, a **Versioned Template Catalogue**, **Specialist AI Agents**, and **Deterministic Validation**—keeping consequential actions behind explicit human approval gates.
 
 ---
 
+## Current Status and MVP
+
+**In development; not production-ready or a self-service SaaS product.** The delivery process is operator-led, not an autonomous agent pipeline.
+
+| Area | Available today |
+|---|---|
+| Delivery tooling | Java CLI for CSV/XLSX intake, schema validation, scope/budget checks, human gates and secret scanning |
+| Lead API | Lead capture, validation, dedupe, rate limiting, event dispatch, classification write-back and draft storage; tested with H2 |
+| Automation workflows | Three n8n blueprints: owner notification, enquiry classification and follow-up drafting; real n8n execution remains unverified |
+| Website and staff access | Catalogue contracts only; Angular runtime, staff authentication and dashboard remain to be built |
+| Appointments and reminders | Contracts only; not implemented |
+| Local deployment | Compose definition exists; Docker/PostgreSQL runtime verification remains outstanding |
+
+The **proposed MVP** is a narrower enquiry-to-review pilot: a branded enquiry website, persistent lead capture, one internal notification channel, template follow-up drafts and secure staff review. AI is optional; automatic customer messaging and appointments are deferred for that pilot. It is **not** the complete Lead-to-Appointment package, and its commercial scope needs owner approval before sale.
+
+- [How the system works, owner workflow and MVP acceptance criteria](docs/system-operating-model-and-mvp.md)
+- [Personal-device agent handoff and development priorities](docs/personal-device-agent-handoff.md)
+- [Setup, trial run and capability matrix](docs/orchbiz-setup-and-trial-run-guide.md)
+
+---
+
 ## Key Capabilities
 
-- **Template-First Engineering:** Assembles solutions from pre-tested, versioned website modules and workflow automation blueprints rather than generating untested code from scratch.
+- **Template-First Engineering:** Uses versioned catalogue contracts and reusable implementations where available. Contract-only modules must remain labelled drafts until implemented and verified.
 - **Schema-Driven Intake Pipeline:** Ingests structured customer requirements (via spreadsheet/form exports) and validates them against strict JSON Schemas before planning begins.
 - **Multi-Agent Collaboration with Human Gates:** Specialist agents handle requirement analysis, architecture mapping, brand copy, website configuration, workflow parameterization, and QA—pausing at mandatory human review gates.
 - **Deterministic Quality & Security Enforcement:** Every template defines explicit input/output schemas, required permissions, cost estimates, test cases, and rollback procedures.
-- **Strict Tenant Isolation:** Customer configurations, deliverables, state tracking, and credential references are isolated per engagement.
+- **Per-Engagement Isolation:** Customer artifacts and credential references are separated by engagement. Client-facing staff authentication and tenant authorization are still required before releasing a dashboard.
 
 ---
 
@@ -38,7 +59,7 @@ flowchart TD
 
 ## Reusable Template Catalogue
 
-Every module in [`catalogue/`](catalogue/README.md) adheres to the [`template.schema.json`](catalogue/template.schema.json) contract, specifying its semantic version, input/output schemas, dependencies, supported integrations, configuration fields, operating cost estimate, required permissions, test cases, and rollback approach.
+Every module in [`catalogue/`](catalogue/README.md) adheres to the [`template.schema.json`](catalogue/template.schema.json) contract, specifying its semantic version, input/output schemas, dependencies, supported integrations, configuration fields, operating cost estimate, required permissions, test cases, and rollback approach. The tables below describe catalogue scope, not a claim that every module is implemented. Check each manifest's `implementationStatus`, implementation pointers and limitations.
 
 ### Website Modules (`catalogue/websites/`)
 | Module ID | Purpose |
@@ -54,7 +75,7 @@ Every module in [`catalogue/`](catalogue/README.md) adheres to the [`template.sc
 ### Automation Blueprints (`catalogue/automations/`)
 | Blueprint ID | Purpose |
 |---|---|
-| `capture-and-store-lead` | Validates incoming webhook payload, deduplicates, and persists lead to database/sheet |
+| `capture-and-store-lead` | Lead API validates submissions, deduplicates and persists leads to PostgreSQL; optional sheet sync is not implemented |
 | `notify-business-owner` | Sends instant staff notifications via Email, WhatsApp template, or Slack/Telegram |
 | `classify-enquiry` | Uses narrowly scoped LLM extraction to tag intent, urgency, and service interest |
 | `draft-follow-up` | Prepares personalized, brand-aligned follow-up drafts for review or approved sending |
@@ -66,7 +87,7 @@ Every module in [`catalogue/`](catalogue/README.md) adheres to the [`template.sc
 
 ## Flagship Package: Lead-to-Appointment System
 
-The platform's reference package ([`starter-lead-to-appointment.json`](catalogue/packages/starter-lead-to-appointment.json)) bundles an end-to-end lead capture, qualification, instant staff notification, follow-up drafting, appointment booking, and tracking pipeline tailored for service and training businesses.
+The platform's reference package ([`starter-lead-to-appointment.json`](catalogue/packages/starter-lead-to-appointment.json)) defines an end-to-end lead capture, qualification, staff notification, follow-up drafting, appointment booking, and tracking pipeline tailored for service and training businesses. This is the target package scope, not a fully implemented release. The proposed MVP is a smaller pilot and does not change this manifest.
 
 - **Recommended Stack:** Angular (Frontend), Spring Boot (REST API), PostgreSQL (Persistence), and n8n (Workflow Automation).
 - **AI Usage Policy:** Models are used selectively for classification, extraction, summarization, and drafting; deterministic code enforces validation, routing rules, and permissions.
@@ -90,7 +111,7 @@ The platform's reference package ([`starter-lead-to-appointment.json`](catalogue
 
 ## Operating Guardrails
 
-1. **Reuse Over Invention:** Solutions are composed from tested catalogue modules rather than generated ad-hoc.
+1. **Reuse Over Invention:** Select approved catalogue modules; distinguish tested implementations from contracts and drafts.
 2. **AI Proposes, Code Validates:** Structured outputs are validated against JSON Schemas and automated checks prior to release.
 3. **Zero Fabricated Claims:** Agents never invent testimonials, certifications, or business metrics; unverified claims are explicitly flagged for client confirmation.
 4. **Explicit Approval Gates:** External messaging activation, paid API usage, DNS changes, and production deployments require explicit human sign-off.
@@ -108,7 +129,9 @@ orchbiz/
 │   ├── intake-questionnaire-spec.md   # Client intake questionnaire specification & field mapping
 │   ├── agent-workflow.md              # Multi-agent collaboration protocol & approval gates
 │   ├── copilot-agents-setup.md        # Instructions for configuring selectable IDE Copilot Agents
-│   └── orchbiz-setup-and-trial-run-guide.md  # Step-by-step usage, trial run, current status & roadmap
+│   ├── orchbiz-setup-and-trial-run-guide.md  # Step-by-step usage, trial run, current status & roadmap
+│   ├── system-operating-model-and-mvp.md   # Owner workflow, proposed MVP scope and acceptance criteria
+│   └── personal-device-agent-handoff.md    # Continuation instructions and known integration gaps
 ├── intake/
 │   ├── intake.schema.json             # JSON Schema for validating customer intake briefs
 │   └── questionnaire-template.csv     # Sample intake template (Fictional Coaching Institute demo)
