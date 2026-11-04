@@ -2,7 +2,7 @@
   "id": "services-and-pricing",
   "version": "0.1.0",
   "category": "website",
-  "purpose": "Card grid of courses or services with duration, price/fee range, audience and a per-card enquiry CTA that pre-selects the course in the enquiry form.",
+  "purpose": "Card grid of courses or services with duration, price/fee range, audience and a per-card enquiry CTA that links to the enquiry form.",
   "implementationStatus": "in-development",
   "inputSchema": {
     "type": "object",
@@ -28,25 +28,26 @@
     "type": "object",
     "properties": {
       "sectionId": { "const": "services" },
-      "courseOptions": { "type": "array", "items": { "type": "string" }, "description": "Names exposed to the enquiry-form course selector" }
+      "courseOptions": { "type": "array", "items": { "type": "string" }, "description": "Optional names to configure separately in the enquiry-form selector; service cards do not pre-select them" }
     }
   },
   "dependencies": ["business-landing-page"],
   "supportedIntegrations": [],
   "configurationFields": [
     { "key": "services", "type": "array", "required": true, "description": "From website-copy.json services[]" },
-    { "key": "showPrices", "type": "boolean", "required": false, "default": true, "description": "Hide prices when the client prefers 'Contact us for fees'" },
-    { "key": "layout", "type": "enum(cards|table)", "required": false, "default": "cards", "description": "Card grid or comparison table" }
+    { "key": "showPrices", "type": "boolean", "required": false, "default": true, "description": "Planned option to hide prices; not supported by the current template" },
+    { "key": "layout", "type": "enum(cards|table)", "required": false, "default": "cards", "description": "Planned layout option; the current template renders cards only" }
   ],
   "estimatedMonthlyCostUSD": 0,
   "permissionsRequired": [],
   "testCases": [
     { "id": "SNP-01", "description": "Render three services from the sample intake", "expectedOutcome": "Three cards with name, duration and price exactly as supplied" },
-    { "id": "SNP-02", "description": "Click 'Enquire' on a card", "expectedOutcome": "Scrolls to the enquiry form with that course pre-selected" },
-    { "id": "SNP-03", "description": "Render with showPrices=false", "expectedOutcome": "No price text appears anywhere in the section" }
+    { "id": "SNP-02", "description": "Click 'Ask about this service' on a card", "expectedOutcome": "Navigates to the enquiry form; the service is not pre-selected" },
+    { "id": "SNP-03", "description": "Render a service without a price value", "expectedOutcome": "No price text appears on that service card" }
   ],
   "knownLimitations": [
-    "Angular template is in development; services rendered and a 390px mobile layout had no horizontal overflow in a fictional-tenant browser run; live client configuration remains unverified.",
+    "The current Angular template renders service cards and links each CTA to the enquiry form. It does not pre-select the service or implement the showPrices/layout configuration fields; those are not supported until implemented and tested.",
+    "Services rendered without horizontal overflow at 390px in a fictional-tenant browser run; live client configuration remains unverified.",
     "No online payment or checkout."
   ],
   "rollbackApproach": "Disable the module in site.config.json enabledModules and redeploy, or redeploy the previous build.",

@@ -13,7 +13,7 @@ website form ──POST /api/leads──▶ lead-api ──▶ PostgreSQL (tenan
 ## Build and test (Java 17 + Maven)
 
 ```powershell
-mvn -B -f platform\lead-api\pom.xml package      # runs 18 tests on in-memory H2 (PostgreSQL mode)
+mvn -B -f platform\lead-api\pom.xml package      # runs the API test suite on in-memory H2 (PostgreSQL mode)
 java -jar platform\lead-api\target\lead-api.jar  # needs a reachable PostgreSQL
 ```
 

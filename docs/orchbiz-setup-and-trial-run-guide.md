@@ -2,7 +2,7 @@
 
 This guide explains how the OrchBiz GitHub Copilot agent setup works, walks through a full trial run using the sample intake, and lists what currently works, what is a stub, and how to move to a working or complete system.
 
-> **Status snapshot (2026-11-03):** The deterministic CLI and lead API are implemented and their automated suites pass; four automation modules have blueprints, and the n8n Code-node logic is tested. A reusable Angular public-site template now builds and passes component tests with Node 24 LTS. Without Docker, portable PostgreSQL 16.10 migrations and API smoke checks passed, a headless-Chrome run of the template against the API passed (including CORS and an axe audit), and the n8n blueprints were imported and published in n8n 2.46.4. The Docker Compose stack and live n8n workflow executions are still unverified. See [`personal-device-agent-handoff.md`](personal-device-agent-handoff.md) for exact evidence and limitations.
+> **Status snapshot (2026-11-04):** The deterministic CLI and lead API are implemented and their automated suites pass; four automation modules have implementations or blueprints, and the n8n Code-node logic is tested. The reusable Angular public-site template has unit tests, a production build and a committed single-worker Playwright/axe suite in CI. The browser suite uses mocked API responses. Without Docker, portable PostgreSQL 16.10 migrations and API smoke checks passed, a separate browser run against the API passed (including CORS and an axe audit), and all three n8n blueprints were imported and published in n8n 2.46.4. The Docker Compose stack and live n8n workflow executions remain unverified. The latest confirmed GitHub Actions run succeeded for `aad7e65` on 2026-11-03; local focused website tests/build also passed on 2026-11-04. See [`personal-device-agent-handoff.md`](personal-device-agent-handoff.md) for exact evidence and limitations.
 
 ---
 
@@ -100,7 +100,7 @@ This is a TRIAL RUN using the fictional sample intake.
 | `spec/clarification-questions.md` | Likely non-blocking questions. For example: the INR budget compared with USD-denominated module costs, which WhatsApp Business provider to use for the approved template, and whether PostgreSQL or Google Sheets is the system of record. |
 | `spec/architecture-plan.json`, `spec/technical-spec.md` | Mermaid data flow, webhook contracts, and a budget table comparing INR 2,500/month with the estimate. |
 
-> ⚠️ **Expected limitation:** all module manifests exist, so versions, dependencies and costs are checkable (`check-budget` reports USD 24/month against ~USD 28.41). But most modules are `implementationStatus: contract-only`, and the two `in-development` ones are not yet verified on a real stack. So a correct agent marks the generated configuration as **draft** and does not claim a working build. Reject output that invents versions or costs that differ from the manifests.
+> ⚠️ **Expected limitation:** all 14 module manifests exist, but only eight are `in-development`; six remain `contract-only`. The checkable versions, dependencies and costs do not prove that every module is implemented. Keep outputs involving incomplete modules labelled **draft**. The sample's generated configuration is not a working client build, even though the reusable public-site template and lead API have separate local verification evidence. `check-budget` reports USD 24/month against an approximately USD 28.41 budget; use the CLI result and manifest values rather than inventing versions or costs.
 
 ### Step 2: Approve Gate 1 as a human
 
@@ -132,7 +132,7 @@ Agents are instructed never to change this flag for you.
 - `website/site.config.json` and `website/preview-instructions.md`.
 - `automations/workflows-config.json`, n8n workflow JSON, `env.template` and `workflow-test-plan.md`.
 
-> ⚠️ **Expected limitation:** These outputs are **drafts of configuration and documentation**. A reusable website template now exists, but this trial does not by itself configure a real tenant/API, prove the generated artifacts work in a browser, or provide integration evidence. Any n8n JSON is written by the agent rather than derived from a tested blueprint, so treat it as a sketch. Do not treat it as importable or tested.
+> ⚠️ **Expected limitation:** These outputs are **drafts of configuration and documentation**. This trial does not configure a real tenant/API or verify its generated artifacts in a browser. Configure the approved n8n blueprints from `catalogue/automations/` rather than inventing workflow JSON. A workflow with no compatible implemented blueprint remains a draft and must not be treated as importable or tested. The existing blueprints have been imported and published locally, but their live executions remain unverified.
 
 **Negative test:** Before Step 2, set Gate 1 back to `false` and run `/02-generate-deliverables`. The agent should refuse and list the Gate 1 artifacts that need review.
 
@@ -207,8 +207,8 @@ git status --short   # should show no clients/ entries
 
 | Area | Current state | Risk |
 |---|---|---|
-| `catalogue/websites/business-landing-page/template/` | Angular 21 public site with data-driven sections, responsive styles, a dynamic enquiry form, dev API proxy, unit tests and production build. Uses Node 24 LTS. | A fictional-tenant browser run against the real API (CORS, axe WCAG 2.1 A/AA, 390px layout) passed locally but is not yet a committed test. Configured client artifacts, an in-repo browser suite and deployment still need verification. Dashboard and full scheduler remain out of scope. |
-| `catalogue/automations/` | Three blueprints exist: `notify-business-owner` (email only, dry-run/staging), `classify-enquiry` (consent-gated LLM labelling) and `draft-follow-up` (template drafts saved as `awaiting-approval`, never sent). Their structure is checked by the CLI and the Code-node logic is unit-tested with Node, but **none has been imported into a running n8n**. The other automations are manifests only. | Import them and run NBO/CLE/DFU tests before relying on them. There is no draft approval UI yet. |
+| `catalogue/websites/business-landing-page/template/` | Angular 21 public site with data-driven sections, responsive styles, a dynamic enquiry form, dev API proxy, unit and Playwright browser tests, and production build. Declared toolchain: Node 24 LTS. | The committed browser regressions cover the fictional fixture, mocked API outcomes, responsive layout and axe WCAG 2.1 A/AA. A separate fictional-tenant run against the real API (CORS and 390px layout) passed locally. Configured client artifacts and deployment still need verification. Dashboard and automated scheduling remain out of scope. |
+| `catalogue/automations/` | Three blueprints exist: `notify-business-owner` (email only, dry-run/staging), `classify-enquiry` (consent-gated LLM labelling) and `draft-follow-up` (template drafts saved as `awaiting-approval`, never sent). Their structure is checked by the CLI and Code-node logic is unit-tested with Node. All three were imported and published in n8n 2.46.4, but no live workflow execution has been verified. Other automation modules are manifests only. | Verify NBO/CLE/DFU executions before relying on them. There is no draft approval UI yet. |
 | Lead API runtime | Automated tests use H2. Flyway migrations and the API smoke checks passed against portable PostgreSQL 16.10 without Docker; `docker-compose.yml` and the Dockerfile themselves have not been run because Docker was unavailable. | Run `docker compose up` on a Docker-capable machine and repeat the smoke test, including notification. |
 | Cost figures and FX rates | Operator estimates in manifests, package `baseInfrastructure` and `fx-rates.json`. | Confirm with real provider pricing before quoting a client. |
 | Gate enforcement | CLI + agent contracts + pre-commit hook + CI checks. | A manual edit outside the agents could still skip a gate. |
@@ -217,9 +217,8 @@ git status --short   # should show no clients/ entries
 
 ### ❌ Not implemented
 
-- A committed Playwright/axe suite and Lighthouse checks. A session-only browser run against the running lead API passed, but it is not in the repository or CI.
-- Verified n8n workflow executions. The blueprints import and publish in an npm-installed n8n 2.46.4, but no notification, classification or draft execution has been verified, the compose file has not been run, and no hosting has been chosen.
-- Automated tests of website deliverables: Playwright and Lighthouse/axe. (An API smoke test exists: `tools/smoke/lead-api-smoke.ps1`.)
+- Lighthouse checks. The committed Playwright/axe suite uses a mocked API; live API, CORS and PostgreSQL integration checks remain separate evidence.
+- Verified n8n workflow executions. All three blueprints import and publish in an npm-installed n8n 2.46.4, but no notification, classification or draft execution has been verified; the Compose file has not been run, and no hosting has been chosen.
 - Staging and production deployment targets.
 - A headless orchestrator triggered by form submission (Phase 3).
 - The Operations & Optimization agent (deferred to Phase 4).
@@ -237,18 +236,18 @@ git status --short   # should show no clients/ entries
 
 ### Phase A: Working capacity, with deterministic specifications — ✅ done
 
-Delivered: the Java 17 OrchBiz CLI (`tools/README.md`), output schemas in `schemas/`, normalized budget fields, 14 contract-only manifests, `fx-rates.json`, the pre-commit hook, CLI calls wired into every agent contract and stage prompt, and the documentation fixes above.
+Delivered: the Java 17 OrchBiz CLI (`tools/README.md`), output schemas in `schemas/`, normalized budget fields, 14 module manifests (six currently contract-only), `fx-rates.json`, the pre-commit hook, CLI calls wired into every agent contract and stage prompt, and the documentation fixes above.
 
 **Phase A exit test (passed):** the sample intake goes through `init-client` → `parse-intake` → `check-scope` → `check-budget` (USD 24 vs ~USD 28.41 budget) → `check-gate gate1` (blocked until approved with approver and timestamp). Architecture plans remain labelled draft while modules are `contract-only`.
 
 ### Phase B: Minimal working product, an end-to-end demo for one client (about 3–6 weeks) — 🟡 in progress
 
-1. **Website template** — 🟡 implemented in development at `catalogue/websites/business-landing-page/template/`. It renders public copy/config assets, tests the `{tenantId, submittedAt, sourcePage, fields}` form payload, and builds under Node 24 LTS. Remaining: real API/proxy test, Playwright, responsive and accessibility evidence, preview/config packaging and deployment. Node 24 LTS is supported by Angular 21; Node 25.9.0 on the inspected machine is not.
+1. **Website template** — 🟡 implemented in development at `catalogue/websites/business-landing-page/template/`. It renders public copy/config assets, tests the `{tenantId, submittedAt, sourcePage, fields}` form payload, and builds under Node 24 LTS. The fictional-tenant browser/API, CORS, responsive and axe checks passed locally. A committed single-worker Playwright/axe suite now covers browser behavior with a mocked API. Remaining: configured-client preview packaging and deployment. Node 24 LTS is supported by Angular 21; Node 25.9.0 on the inspected machine is outside the declared LTS toolchain.
 2. **Lead API and storage** — ✅ built and unit-tested (`platform/lead-api/README.md`). Migrations and smoke checks passed against portable PostgreSQL 16.10; remaining: run it in the Compose stack.
-3. **n8n blueprints** — 🟡 `notify-business-owner`, `classify-enquiry` and `draft-follow-up` are written, structure-checked and logic-tested; import them and run NBO/CLE/DFU tests. Capture is handled by the lead API, not n8n.
+3. **n8n blueprints** — 🟡 `notify-business-owner`, `classify-enquiry` and `draft-follow-up` are written, structure-checked, logic-tested, imported and published in n8n 2.46.4; run NBO/CLE/DFU executions and verify their effects. Capture is handled by the lead API, not n8n.
 4. **Local stack** — 🟡 `docker-compose.yml` + `.env.example` are written but have not been run. `make preview CLIENT=<slug>` is still to do and depends on the website template.
-5. **Test evidence** — 🟡 Angular unit tests cover rendering, validation, payload, duplicate, API error and rate-limit handling. `tools/smoke/lead-api-smoke.ps1` covers earlier API contract checks. A session-only Playwright/axe run against the API passed (18 checks, including CORS); still to add: that suite in the repository/CI, Lighthouse and workflow execution checks. Save client evidence in `clients/<slug>/qa/evidence/`.
-6. **CI** — 🟡 `.github/workflows/ci.yml` now installs the locked Angular dependencies with Node 24, runs the unit suite and production build, and validates the demo config/copy. Confirm the updated workflow in GitHub Actions after these changes are pushed.
+5. **Test evidence** — 🟡 Angular unit and committed Playwright/axe tests cover rendering, validation, payload, mocked success/error responses and responsive layout. `tools/smoke/lead-api-smoke.ps1` covers API contract checks. A session-only Playwright/axe run against the API passed (18 checks, including CORS); still to add: Lighthouse and live workflow execution checks. Save client evidence in `clients/<slug>/qa/evidence/`.
+6. **CI** — 🟡 `.github/workflows/ci.yml` installs the locked Angular dependencies with Node 24, runs the unit and Playwright browser suites plus production build, and validates the demo config/copy. The latest confirmed run succeeded on `aad7e65` (2026-11-03); rerun after the current uncommitted CI changes are committed and pushed.
 
 **Order for running the local stack (on a machine with Docker):** `copy .env.example .env` and fill in the values → `docker compose up -d --build`. In n8n (http://localhost:5678), create the Header Auth credential `LEAD_EVENTS_WEBHOOK_HEADER_REF` with header `X-OrchBiz-Token` and the value of `LEAD_EVENTS_WEBHOOK_TOKEN`. Also create an SMTP credential `SMTP_CREDENTIAL_REF` that points at a test mailbox. Import `catalogue/automations/notify-business-owner/notify-business-owner.workflow.json` and select both credentials. Activate the workflow (dry-run by default). Register the tenant with `PUT /api/admin/tenants/apex-coaching`, then run `.\tools\smoke\lead-api-smoke.ps1` and check the n8n execution log.
 

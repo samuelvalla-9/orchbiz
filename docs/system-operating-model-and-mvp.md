@@ -1,7 +1,7 @@
 # OrchBiz: How the System Works and the Minimum Viable Product
 
 Status: proposed MVP scope and development specification, not a released product.
-Prepared: 2026-11-03.
+Prepared: 2026-11-04.
 
 ## 1. What you are building as the owner
 
@@ -51,7 +51,7 @@ flowchart LR
     D --> S[Staff review]
 ```
 
-The runtime diagram is the intended flow. The website and staff review UI are not implemented yet; workflows are handwritten blueprints awaiting real n8n verification. Appointment and approved-reminder capabilities belong to the full starter package but are also not implemented.
+The runtime diagram is the intended flow, not a fully verified deployment. A reusable Angular public-site template exists and has passed a local fictional-tenant browser run against the API; client-specific configuration and release are not complete. The authenticated staff review UI is not implemented. Three n8n blueprints were imported and published in n8n 2.46.4, but their live executions remain unverified. Automated appointment scheduling and reminders belong to the full starter package and are not implemented.
 
 ### Responsibilities of each component
 
@@ -155,7 +155,7 @@ This is the smallest coherent pilot proposed here. It validates whether you can 
 | Area | Minimum behavior | Current position |
 |---|---|---|
 | Delivery process | Intake, validated scope/budget, two owner gates, QA evidence and handover | Tooling/contracts exist; end-to-end engagement still needs exercising |
-| Public website | Branded landing content, services, accessible enquiry form and clear outcomes | Module contracts only |
+| Public website | Branded landing content, services, accessible enquiry form and clear outcomes | Reusable Angular template with unit/build and committed browser regressions using a mocked API; client configuration, live integration and deployment remain |
 | Lead capture | Required-field validation, tenant checks, dedupe, spam trap and rate limiting | API implemented; migrations and smoke checks passed on portable PostgreSQL 16.10; Compose stack not run |
 | Persistence | Leads/events/drafts survive restart; backup and restore demonstrated | Migrations exist; runtime/restore evidence missing |
 | Internal notification | One supported channel, dry-run locally and an explicitly approved staff test in staging | Email blueprint imported and published in n8n 2.46.4; actual n8n/SMTP execution unverified |
@@ -210,9 +210,9 @@ Use `docs\personal-device-agent-handoff.md` for exact bootstrap commands and lim
 
 Completion: reproducible stack, real PostgreSQL persistence and documented integration results. This is a technical demo, not the MVP.
 
-### Milestone B: public website and browser-to-database flow
+### Milestone B: configure the public website and verify the browser-to-database flow
 
-Implement reusable Angular modules, reconcile form-key/schema/API contracts, load validated content/configuration and test browser submission against the API.
+Configure the existing reusable Angular template with validated, approved client artifacts; reconcile form-key/schema/API contracts and exercise browser submission against the API. A reproducible browser regression suite now covers the fictional fixture, responsive layout, form handling and axe checks with a mocked API. Separately verify live API, CORS and persistence behavior.
 
 Completion: a fictional branded preview captures enquiries reliably. Staff authentication and review may still be missing.
 
@@ -246,10 +246,10 @@ Measure actual delivery effort, defects, support incidents and recurring service
 
 ## 8. Present-day status and next action
 
-The code-level baseline was rerun on a non-personal Windows workstation on 2026-11-03: CLI (16 tests), lead API (28 tests), catalogue validation, n8n Code-node tests and the secret scan all passed. The latest GitHub Actions run for `GH-Copilot_Setup` at `8f75de4` also completed successfully. These checks do not verify a personal device or live integrations.
+The latest confirmed GitHub Actions run for `GH-Copilot_Setup` succeeded on `aad7e65` on 2026-11-03 (run `41678453625`). On 2026-11-04, the website's 11 unit tests, five Playwright browser tests and production build passed locally; the browser suite ran in installed Edge with mocked API responses. Catalogue validation also passed. Playwright's bundled Chromium download failed locally with `ECONNRESET`, so the CI Chromium browser has not been reproduced on this workstation. The current system Node 25.9.0 is outside the template's declared Node 24 LTS toolchain. These results do not verify the personal device, current uncommitted CI changes or live n8n workflow executions.
 
-The inspected machine's system Node 25.9.0 is unsupported by Angular CLI 21.2.11. An isolated Node 24.22.2 LTS runtime was downloaded to session storage instead; with it, the Angular website template at `catalogue/websites/business-landing-page/template` passes its unit suite and production build. Its fictional config and copy pass the OrchBiz CLI schemas. Docker is unavailable on that machine, so portable PostgreSQL 16.10 and an npm-installed n8n 2.46.4 were used instead: migrations and API smoke checks passed, a headless-Chrome run of the site against the API passed (submission, CORS, axe WCAG 2.1 A/AA, mobile layout), and the blueprints were imported and published after fixing a credential-binding defect. n8n executions, the Compose stack, a committed browser suite and preview packaging remain. Install Node 24 LTS on the personal device before continuing the web work.
+The previous non-personal workstation run used an isolated Node 24.22.2 LTS runtime because system Node 25.9.0 is outside the template's declared Node 24 LTS engine range. On 2026-11-04 the component tests and production build also passed with the available system Node 25.9.0, with Angular's unsupported odd-numbered Node warning; this is not supported-toolchain evidence. The fictional config and copy pass the OrchBiz CLI schemas. Docker is unavailable on this machine, so portable PostgreSQL 16.10 and an npm-installed n8n 2.46.4 were used previously: migrations and API smoke checks passed, a headless-Chrome run of the site against the API passed (submission, CORS, axe WCAG 2.1 A/AA, mobile layout), and the blueprints were imported and published after fixing a credential-binding defect. The repository now includes browser regression tests using a mocked API; all five passed locally in Edge, while Playwright's Chromium download failed with `ECONNRESET`. Live n8n executions, the Compose stack and preview packaging remain. Use Node 24 LTS for supported website work.
 
 The repository does not yet have a release-ready, client-configured Angular website, secure staff dashboard, appointment system or production installation.
 
-The immediate next engineering milestone is **Milestone A**, followed by **Milestone B**. The personal-device handoff supplies the detailed continuation instructions. This document defines the intended operating model and proposed MVP; it does not certify that the MVP is built, approved or ready to sell.
+The immediate next engineering milestone is **Milestone A** (verify the Compose stack and live workflow execution), followed by **Milestone B** (configure the existing website template and verify it against the live API). The repository includes reproducible mocked-API browser regressions; those do not establish CORS or persistence behavior. The personal-device handoff supplies the detailed continuation instructions. This document defines the intended operating model and proposed MVP; it does not certify that the MVP is built, approved or ready to sell.

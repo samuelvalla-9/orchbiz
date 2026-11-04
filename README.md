@@ -15,9 +15,9 @@ Instead of treating every client engagement as a bespoke build from scratch, **O
 | Delivery tooling | Java CLI for CSV/XLSX intake, schema validation, scope/budget checks, human gates and secret scanning |
 | Lead API | Lead capture, validation, dedupe, rate limiting, event dispatch, classification write-back and draft storage; tested with H2 |
 | Automation workflows | Three n8n blueprints: owner notification, enquiry classification and follow-up drafting; import and publishing verified in n8n 2.46.4; real executions remain unverified |
-| Website and staff access | Catalogue contracts only; Angular runtime, staff authentication and dashboard remain to be built |
-| Appointments and reminders | Contracts only; not implemented |
-| Local deployment | Compose definition exists; Docker/PostgreSQL runtime verification remains outstanding |
+| Website and staff access | Angular public-site template for landing content, services, enquiries and limited manual/external booking; unit and Playwright/axe browser regressions run in CI; no staff authentication or dashboard |
+| Appointments and reminders | Automated scheduling and reminders are contract-only and not implemented; website booking is limited to an external link or manual follow-up |
+| Local deployment | Compose definition exists; Docker/PostgreSQL runtime verification remains outstanding. The committed browser suite mocks the API and does not replace live integration checks. |
 
 The **proposed MVP** is a narrower enquiry-to-review pilot: a branded enquiry website, persistent lead capture, one internal notification channel, template follow-up drafts and secure staff review. AI is optional; automatic customer messaging and appointments are deferred for that pilot. It is **not** the complete Lead-to-Appointment package, and its commercial scope needs owner approval before sale.
 
@@ -142,14 +142,14 @@ orchbiz/
 │   ├── template.schema.json           # Required metadata contract for all catalogue modules
 │   ├── fx-rates.json                  # Operator-maintained currency rates for budget checks
 │   ├── packages/                      # Bundled service package definitions
-│   ├── websites/                      # Website module manifests (contract-only, v0.1.0)
+│   ├── websites/                      # Website module manifests; four in-development, three contract-only
 │   └── automations/                   # Automation manifests + n8n blueprints (*.workflow.json)
 ├── platform/
 │   ├── lead-api/                      # Spring Boot lead API: leads, rate limit, n8n event outbox, classification/draft write-back
 │   └── local/postgres-init/           # DB bootstrap used by docker-compose
 ├── docker-compose.yml                 # Local stack: PostgreSQL + n8n + lead API (copy .env.example → .env)
 ├── .env.example                       # Placeholder variables for the local stack (never commit .env)
-├── .github/workflows/ci.yml           # CI: build/test CLI + lead API, validate catalogue, scan secrets
+├── .github/workflows/ci.yml           # CI: Java suites, catalogue/workflow checks, Angular unit/browser tests + build, secret scan
 ├── schemas/                           # JSON Schemas for state and every agent output artifact
 ├── tools/
 │   ├── README.md                      # OrchBiz CLI commands, exit codes & hook install

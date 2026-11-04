@@ -29,7 +29,7 @@ with the device owner's permission, using official installers.
 | Node.js **24 LTS** and npm **11** | Workflow Code-node checks and Angular tests/build/preview | Install [Node.js](https://nodejs.org/en/download) 24 LTS with npm. `node --version` must report `v24.*` and `npm --version` must satisfy the website's `engines` requirement. A version manager is optional. |
 | Docker engine and Compose v2 | Container-based PostgreSQL, n8n and API integration (steps 5-9) | Use [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/) on a supported Windows device, or [Docker Engine](https://docs.docker.com/engine/install/) plus the [Compose plugin](https://docs.docker.com/compose/install/) on a supported Linux host. Start the engine; both client and server must appear in `docker version`. Use Linux containers for this stack. Review licensing on a work device. |
 | Supported virtualization/container backend | Docker on Windows | Follow Docker's current OS/hardware requirements. Enable virtualization and the supported WSL 2 or Hyper-V backend with owner/admin permission; a reboot may be needed. WSL is not needed for the non-container checks. If policy blocks this setup, mark container checks blocked rather than bypassing policy. |
-| Current Chrome, Edge or Firefox with DevTools | Manual website, responsive and CORS checks | Install/update through the browser's official channel. No ChromeDriver or global Playwright install is needed for the manual checklist. |
+| Current Chrome, Edge or Firefox with DevTools | Manual website, responsive and CORS checks | Install/update through the browser's official channel. The committed Playwright suite uses its own Chromium installation; no ChromeDriver or global Playwright install is needed. |
 | Approved axe browser extension (optional) | The browser accessibility audit | Install [axe DevTools](https://www.deque.com/axe/devtools/) if permitted. Without it, record the automated accessibility audit as **NOT RUN**; keyboard testing alone does not replace it. |
 | Network access and trusted TLS configuration | First dependency restore and image downloads | Allow authorized access to Maven repositories, `registry.npmjs.org` and the container registries used by Compose. Configure any approved proxy/CA correctly; never disable TLS checks. Offline runs require already cached dependencies/images. |
 | Available memory, disk and local ports | Builds, dependency caches and running services | Ensure space for Maven/npm caches, `node_modules`, build output, container images and database volumes (several GB, varying by environment). Docker must have resources meeting its current requirements. Free ports 4200, 5432, 5678 and 8080, or document deliberate local alternatives. |
@@ -42,12 +42,13 @@ PostgreSQL, n8n, the API runtime and the database client. The Code-node script
 uses only Node built-ins. Do not run `npm install -g @angular/cli` or install
 native database services just to follow this guide.
 
-Playwright is not currently a committed test dependency or suite; manual browser
-checks do not require it. A local SMTP sink is optional only if the dry-run
-workflow editor requires SMTP configuration. Live SMTP, AI API keys, tunnels,
-paid hosting and production deployment are **not prerequisites** for these
-local tests. Provider-failure cases require a separately approved local fake
-provider; otherwise record them as **NOT RUN**.
+The website template includes a committed Playwright/axe suite. It uses a
+mocked API and does not replace live API, CORS or database checks below. A local
+SMTP sink is optional only if the dry-run workflow editor requires SMTP
+configuration. Live SMTP, AI API keys, tunnels, paid hosting and production
+deployment are **not prerequisites** for these local tests. Provider-failure
+cases require a separately approved local fake provider; otherwise record them
+as **NOT RUN**.
 
 After installation, reopen the terminal so `PATH` changes take effect, then
 verify the tools:
@@ -154,6 +155,10 @@ npm ci
 $LASTEXITCODE
 npm test -- --watch=false
 $LASTEXITCODE
+npx playwright install chromium
+$LASTEXITCODE
+npm run test:e2e
+$LASTEXITCODE
 npm run build
 $LASTEXITCODE
 Pop-Location
@@ -161,8 +166,10 @@ Pop-Location
 
 Stop within that directory if any command fails; don't continue automatically.
 Use `npm ci` for a fresh checkout or changed lockfile, not before every test.
-Expected: component tests pass (last verified: 11), production build succeeds,
-and static output appears under `dist\orchbiz-website-template\`.
+Expected: component tests pass (last verified: 11), all five Playwright
+regressions pass, production build succeeds, and static output appears under
+`dist\orchbiz-website-template\`. The browser tests use the fictional fixture
+and mock API responses; they do not establish live API, CORS or database health.
 Worker-start timeouts under memory pressure need investigation before being
 classified as code failures.
 
@@ -404,8 +411,8 @@ docker compose ps
 
 Wait for health/startup, then re-read the same lead and draft with the admin
 API and check published workflows remain available. Record before/after IDs.
-There is currently no committed Playwright/axe suite; a manual checklist is
-not evidence that an automated browser suite or CI integration exists.
+The committed Playwright/axe suite tests browser regressions with a mocked API;
+it is not evidence of this live persistence check.
 
 ## 10. Client checks, hygiene and shutdown
 

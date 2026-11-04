@@ -44,6 +44,8 @@ jobs:
           npm ci
           npm test -- --watch=false
           npm run build
+          npx playwright install --with-deps chromium
+          npm run test:e2e
 
       - name: Validate fictional website fixtures
         run: |

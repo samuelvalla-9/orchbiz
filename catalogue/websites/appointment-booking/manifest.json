@@ -2,7 +2,7 @@
   "id": "appointment-booking",
   "version": "0.1.0",
   "category": "website",
-  "purpose": "Lets prospects pick a demo or counselling slot within business hours, either via an embedded Calendly/Google appointment page or a built-in slot request form.",
+  "purpose": "Provides the website booking callout for a safe external booking link or manual follow-up; automated slot selection is a package-level target, not implemented in the current website template.",
   "implementationStatus": "in-development",
   "inputSchema": {
     "type": "object",
@@ -23,7 +23,7 @@
   },
   "outputSchema": {
     "type": "object",
-    "description": "Booking request event sent to schedule-appointment",
+    "description": "Target booking request event for schedule-appointment; the current website template does not emit it",
     "properties": {
       "leadId": { "type": "string" },
       "requestedStart": { "type": "string" },
@@ -31,23 +31,24 @@
     }
   },
   "dependencies": ["schedule-appointment"],
-  "supportedIntegrations": ["Google Calendar appointment schedules", "Calendly", "Built-in slot request"],
+  "supportedIntegrations": ["External HTTPS booking link (link-out only); other listed modes are planned"],
   "configurationFields": [
     { "key": "booking.type", "type": "enum", "required": true, "description": "Matches intake booking_calendar_type" },
-    { "key": "booking.url", "type": "url", "required": false, "description": "Required for Calendly Link / Google appointment page embeds" },
+    { "key": "booking.url", "type": "url", "required": false, "description": "Required for the supported Calendly Link mode; opens as an external link, not an embed" },
     { "key": "booking.businessHours", "type": "string", "required": true, "description": "From intake business_hours" },
     { "key": "booking.timezone", "type": "IANA timezone", "required": true, "description": "e.g. Asia/Kolkata" },
     { "key": "booking.slotMinutes", "type": "integer", "required": false, "default": 30, "description": "Slot length for built-in requests" }
   ],
   "estimatedMonthlyCostUSD": 0,
-  "permissionsRequired": ["Read free/busy on the client's booking calendar (via schedule-appointment)"],
+  "permissionsRequired": [],
   "testCases": [
     { "id": "APB-01", "description": "Request a slot inside business hours", "expectedOutcome": "Request accepted and forwarded to schedule-appointment" },
     { "id": "APB-02", "description": "Request a slot outside business hours or in the past", "expectedOutcome": "Rejected with a clear message" },
-    { "id": "APB-03", "description": "Calendly Link mode renders embed", "expectedOutcome": "Embed loads; no API calls made from the site" }
+    { "id": "APB-03", "description": "Calendly Link mode renders the external booking callout", "expectedOutcome": "Configured safe URL opens in a new tab; no API calls are made from the site" }
   ],
   "knownLimitations": [
-    "Website supports a safe external Calendly-style HTTPS link and manual follow-up only; built-in, Google Calendar and automated scheduling are not implemented.",
+    "The current website template supports a safe external Calendly-style HTTPS link (opened in a new tab) and manual follow-up only; it does not embed a calendar or submit booking requests.",
+    "APB-01 and APB-02 describe target scheduling behavior and are not implemented or verified. The Calendly link is not an embedded widget.",
     "Built-in mode creates requests, not confirmed bookings; staff confirm in the calendar."
   ],
   "rollbackApproach": "Switch booking.type to 'Manual Follow-up Only' in site.config.json and redeploy.",

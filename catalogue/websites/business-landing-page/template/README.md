@@ -53,5 +53,8 @@ empty testimonial lists omit that section.
 
 `npm test` runs the Angular component tests under Vitest. `npm run build` makes
 the production static site under `dist/orchbiz-website-template/`.
-These commands do not verify a live API, real PostgreSQL, n8n workflows,
-accessibility audit, browser-to-API CORS behavior, or deployment.
+Run `npx playwright install chromium` once, then `npm run test:e2e` for
+single-worker browser regressions covering the fictional fixture, responsive
+layout, form validation, mocked API success/error responses and axe WCAG 2.1
+A/AA checks. These mocked-API tests do not verify a live API, real PostgreSQL,
+n8n workflows, browser-to-API CORS behavior, or deployment.

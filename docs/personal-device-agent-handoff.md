@@ -1,6 +1,6 @@
 # OrchBiz: Personal-Device Agent Handoff
 
-Prepared: 2026-11-03.
+Prepared: 2026-11-04.
 
 For terminal-by-terminal manual verification on any developer device, use the
 [manual test runbook](manual-test-runbook.md). Run heavy suites outside the agent
@@ -10,7 +10,7 @@ conversation to reduce token usage; share only concise results or failure excerp
 
 The owner is launching a business that sells reusable business automation systems to clients. OrchBiz is the delivery workspace for that business: an agent-assisted process for turning a client's questionnaire into scoped requirements, architecture, website content, a configured website, automations, QA evidence and handover documents.
 
-This is **not yet a complete product or an unattended delivery platform**. The repository has working deterministic tooling and a partially implemented runtime. The next objective is a reproducible local demonstration on a personal device, followed by completion of the reusable website and the missing package capabilities.
+This is **not yet a complete product or an unattended delivery platform**. The repository has working deterministic tooling and a partially implemented runtime. The reusable public website template, a fictional browser-to-API run and a committed mocked-API browser regression suite exist. The next objective is to reproduce the backend stack and verify live n8n executions, then implement the remaining package capabilities.
 
 The flagship package is `starter-lead-to-appointment`, aimed initially at coaching/training institutes and small local service businesses. Its approved stack is:
 
@@ -30,15 +30,15 @@ Do not replace this stack, expand package scope or introduce a new orchestration
 |---|---|
 | Repository | `samuelvalla-9/orchbiz` |
 | Working branch | `GH-Copilot_Setup` |
-| Latest inspected commit | `8f75de4` |
+| Latest inspected commit | `aad7e65` |
 | Remote status when inspected | Local branch aligned with `origin/GH-Copilot_Setup` |
-| Worktree when inspected | Clean |
+| Worktree when inspected | Dirty: existing documentation/catalogue edits plus uncommitted browser-suite and CI changes; preserve them |
 | Machine inspected for this update | Non-personal Windows 11 workstation; this is not the personal-device inventory |
-| Tools on inspected machine | Java 24.0.1, Maven 4.0.0-rc-4, system Node 25.9.0/npm 11.6.2, Angular CLI 21.2.11; isolated Node 24.22.2 LTS/npm 11.19.1 downloaded for this workspace session |
-| Runtime/toolchain limitation | Docker is unavailable. System Node 25.9.0 is unsupported by Angular CLI; isolated Node 24.22.2 is supported |
+| Tools on inspected machine | Java 24.0.1, Maven 4.0.0-rc-4, system Node 25.9.0/npm 11.6.2, Angular CLI 21.2.11; installed Edge available |
+| Runtime/toolchain limitation | Docker is unavailable. The template declares Node 24 LTS; system Node 25.9.0 is outside that engine range |
 | Historical network issue | npm previously encountered `SELF_SIGNED_CERT_IN_CHAIN`; npm registry access succeeded during this update without TLS workarounds |
 
-This checkout was inspected at `8f75de4`; fetch the latest `GH-Copilot_Setup` branch rather than checking out only that commit. The code-level checks below were run on the non-personal workstation and do not establish the personal device's software versions or runtime readiness. Read `docs\system-operating-model-and-mvp.md` for the owner workflow and proposed narrower pilot scope; that proposal does not change the existing package manifest or authorize a release. Do not copy credentials, Maven settings, credential stores or machine-specific session folders from another device.
+This checkout was inspected at `aad7e65`; the local branch matched `origin/GH-Copilot_Setup`, but the worktree was not clean. Fetch the latest branch and preserve all current modifications rather than resetting or overwriting them. The code-level checks below were run on the non-personal workstation and do not establish the personal device's software versions or runtime readiness. Read `docs\system-operating-model-and-mvp.md` for the owner workflow and proposed narrower pilot scope; that proposal does not change the existing package manifest or authorize a release. Do not copy credentials, Maven settings, credential stores or machine-specific session folders from another device.
 
 Recent commits, oldest first:
 
@@ -55,6 +55,7 @@ Recent commits, oldest first:
 | `480ffb7` | HTTP smoke-test script |
 | `d503873` | Documentation and configuration updates |
 | `8f75de4` | Additional documentation |
+| `aad7e65` | Angular website template and verified personal-device handoff |
 
 Start with Git CLI, not an IDE's Source Control interface:
 
@@ -144,7 +145,7 @@ There are 14 module manifests. Eight are `in-development` (four automation modul
 | `notify-business-owner` | n8n blueprint | Email only; dry-run/staging; imported and published in n8n 2.46.4, live execution not yet verified |
 | `classify-enquiry` | n8n blueprint plus API write-back | Consent defaults off; imported and published, live execution not yet verified |
 | `draft-follow-up` | n8n blueprint plus API draft storage | Template-first; optional LLM; no approval UI or sending; imported and published, live execution not yet verified |
-| `business-landing-page`, `services-and-pricing`, `enquiry-form` | Angular website template under `catalogue\websites\business-landing-page\template` | Unit/build plus a local browser run against the real API (section 4.5); real client content, an in-repo browser suite and deployment remain |
+| `business-landing-page`, `services-and-pricing`, `enquiry-form` | Angular website template under `catalogue\websites\business-landing-page\template` | Unit/build, committed mocked-API browser regressions and a local browser run against the real API (section 4.5); real client content and deployment remain |
 | `appointment-booking` | External HTTPS booking link or manual follow-up display only | No calendar integration, slot booking, confirmation or reminders |
 
 The remaining six manifests are `0.1.0`, `contract-only`: three website modules and three other automations. Notably, `schedule-appointment` and `send-approved-reminder` are included in the starter package but are not implemented. `weekly-performance-report` is an optional add-on, not an MVP prerequisite.
@@ -160,8 +161,8 @@ The following baseline was rerun on the non-personal workstation for this handof
 | Catalogue validation | Passed: 14 module manifests and all packages |
 | n8n Code-node tests | Passed: CLE-01/02/03 and DFU-01/02/03 |
 | Repository secret scan | Passed: 131 files scanned, no secrets found |
-| Latest GitHub Actions run on `GH-Copilot_Setup` | Confirmed completed successfully for commit `8f75de4` |
-| Website dependency install | Passed clean `npm ci` with the generated lockfile; `npm ls --depth=0` passed |
+| Latest GitHub Actions run on `GH-Copilot_Setup` | Confirmed completed successfully for commit `aad7e65` (run `41678453625`, 2026-11-03) |
+| Website dependency install | A clean `npm ci` passed before Playwright/axe dependencies were added; it has not been rerun with the current lockfile |
 | Website component tests | Passed: 11 tests, including rendering, required/email validation, payload shape, duplicates, API errors, rate limiting, honeypot forwarding and accessible link names |
 | Website production build | Passed with Angular CLI 21.2.11 on Node 24.22.2 LTS |
 | Website demo artifacts | Both fictional fixtures passed `site-config` and `website-copy` CLI schema validation |
@@ -169,11 +170,22 @@ The following baseline was rerun on the non-personal workstation for this handof
 | Catalogue after website changes | Passed: all 14 module manifests and packages |
 | Secret scan after website changes | Passed: 159 files scanned, no secrets found |
 
+Focused continuation checks on 2026-11-04:
+
+| Check | Result on inspected workstation |
+|---|---|
+| Website component suite | Passed: 11 tests using available system Node 25.9.0; Angular emitted an unsupported odd-numbered Node warning |
+| Website production build | Passed using available system Node 25.9.0; use declared Node 24 LTS for supported-toolchain verification |
+| Playwright browser regressions | Passed: 5 tests in installed Microsoft Edge, single worker; fictional fixture and mocked API |
+| Playwright bundled Chromium install | Blocked: repeated CDN download failures with `ECONNRESET`; Chromium-specific local run not completed |
+| Catalogue validation | Passed: 14 module manifests and all packages |
+| GitHub Actions | Latest confirmed run succeeded on `aad7e65`, run `41678453625`, on 2026-11-03; current local CI edits are not part of that run |
+
 These local Maven checks happened to pass with Java 24.0.1 and Maven 4.0.0-rc-4. Those are not the documented Java 17+/Maven 3.9+ baseline; verify the supported toolchain on the personal device rather than treating this as compatibility evidence. Docker was unavailable, so the Compose stack itself was not run; section 4.5 records the portable PostgreSQL, n8n and browser checks that were possible instead.
 
-The system Node 25.9.0 is unsupported by Angular CLI 21.2.11. To avoid a machine-wide install or changing another project's runtime, Node 24.22.2 LTS was downloaded into the session's private files directory and used explicitly. It reports supported in `ng version`; npm registry downloads succeeded without changing TLS settings. This isolated runtime is temporary session storage, not a substitute for installing Node 24 LTS on the personal device.
+An earlier system Node 25.9.0 was outside the template's declared Node 24 LTS engine range. To avoid a machine-wide install or changing another project's runtime, Node 24.22.2 LTS was downloaded into the session's private files directory and used explicitly. It reports supported in `ng version`; npm registry downloads succeeded without changing TLS settings. This isolated runtime is temporary session storage, not a substitute for installing Node 24 LTS on the personal device.
 
-An Angular 21 website template now exists at `catalogue\websites\business-landing-page\template`, with an npm lockfile. It renders schema-validated public assets, a configurable landing/services view, validated enquiry form, backend error states and limited external/manual booking content. Its fictional demo config and copy passed the OrchBiz CLI schema checks. The production build and 11 component tests pass, and a local browser run against the real API passed (section 4.5). Do not treat it as release-ready until real client content, an in-repo browser test suite and deployment checks are complete.
+An Angular 21 website template now exists at `catalogue\websites\business-landing-page\template`, with an npm lockfile. It renders schema-validated public assets, a configurable landing/services view, validated enquiry form, backend error states and limited external/manual booking content. Its fictional demo config and copy passed the OrchBiz CLI schema checks. The production build and 11 component tests pass, and a local browser run against the real API passed (section 4.5). A committed single-worker Playwright suite now covers the fictional fixture with a mocked API; it does not replace live API/CORS/database verification. Do not treat the template as release-ready until real client content and deployment checks are complete.
 
 Earlier historical results and limitations:
 
@@ -206,6 +218,7 @@ Docker and WSL are not installed and winget is blocked by policy, so the stack w
 | Browser run of the Angular template against the API via the dev proxy (fictional `example-learning-studio` tenant) | 18/18 passed: render, services, title, booking manual fallback, required/email validation without POST, submission stored in PostgreSQL, reset, duplicate response, no console errors, axe WCAG 2.1 A/AA with 0 violations, honeypot accepted but not stored, cross-origin submission from an allowed origin, preflight denied for an unlisted origin, friendly tenant error (403), no horizontal overflow at 390px |
 | n8n credentials and workflow import | 4 `*_REF` credentials and all 3 blueprints imported; each node bound to the intended credential after the fix below |
 | n8n publish/restart | All 3 workflows published; after a restart n8n reported 3 published workflows and `/healthz` returned 200 |
+| Committed browser regressions | 5 single-worker Playwright tests cover mobile rendering, validation, success/error responses and axe WCAG 2.1 A/AA using the fictional fixture and mocked API |
 | CLI after changes | `mvn package` passed 16 tests; `validate-catalogue` passed |
 | Not run | Smoke with notification (NBO-01) and live NBO/CLE/DFU executions were stopped at the operator's request; they remain for the personal device |
 
@@ -368,13 +381,13 @@ Test and capture actual n8n execution evidence:
 
 These are continuation tasks to investigate and address with targeted tests, not claims that failures have already been reproduced. Prefer explicit failure states and recoverable/idempotent processing over silently ignoring errors. Record remaining limitations honestly.
 
-## 8. Priority 3: Build the reusable Angular website
+## 8. Priority 3: Configure and harden the reusable Angular website
 
 The public website modules now have an Angular implementation in `catalogue\websites\business-landing-page\template`. The included fixture is clearly fictional; replace it only with validated, approved artifacts when configuring a real preview.
 
 Start with the included public modules: `business-landing-page`, `services-and-pricing`, `enquiry-form`, and the approved `appointment-booking` behavior. Treat the authenticated `lead-dashboard` separately.
 
-Remaining implementation and integration requirements:
+Remaining configuration, integration and verification requirements:
 
 - Render from schema-valid `site.config.json` and `website-copy.json`, not hardcoded client data.
 - Respect `enabledModules`, exact manifest versions, theme tokens, content sources and client identity.
@@ -384,8 +397,8 @@ Remaining implementation and integration requirements:
 - Match CORS to the preview origin; browser behavior must be tested, not inferred from HTTP smoke results.
 - Keep secrets out of public configuration, JavaScript bundles and browser storage.
 - Never fabricate testimonials, prices, accreditation, awards or performance claims.
-- Add responsive, accessible UI and browser tests for form validation and successful submission to the repository and CI. A session-only Playwright/axe run passed (section 4.5) but is not committed; port its scenarios rather than relying on that evidence.
-- Use a supported Angular/Node combination, commit its lockfile and extend CI with the real build/test commands.
+- A single-worker Playwright suite now runs in CI against the fictional fixture, checking form validation, mocked API success/errors, mobile overflow and axe WCAG 2.1 A/AA. It does not replace the live API/CORS/PostgreSQL integration checks recorded in section 4.5.
+- Use a supported Angular/Node combination for client configuration and continue running the committed CI build/unit/browser checks.
 
 The site field-name schema now accepts underscore and hyphen keys used by the API (including `full_name` and `course_interest`). Keep the schema, manifests, tenant requirements, frontend and workflows aligned; do not add one-off renames.
 
@@ -457,4 +470,4 @@ The next agent's handback must distinguish:
 
 ## 12. Suggested first instruction to the personal-device agent
 
-> Read `docs\personal-device-agent-handoff.md` and the canonical documents it references. Inspect this checkout and preserve existing changes. Reproduce the CLI/API/Code-node baseline and run the Angular template's `npm ci`, unit tests and production build with Node 24 LTS. Then, on a Docker-capable machine, bring up PostgreSQL/n8n/API, import notification in dry-run mode, run the smoke test (with notification) against PostgreSQL and record actual NBO/CLE/DFU workflow executions; section 4.5 already covers PostgreSQL migrations, API smoke checks, n8n import/publishing and a browser run without Docker. Add an in-repo browser test for the website covering CORS and responsive/accessibility behavior. Keep credentials local, do not enable paid/live messaging or production deployment, and never approve human gates for me. Report verified outcomes and remaining gaps rather than claiming the entire package is complete.
+> Read `docs\personal-device-agent-handoff.md` and the canonical documents it references. Inspect this checkout and preserve existing changes. Reproduce the CLI/API/Code-node baseline and run the Angular template's `npm ci`, unit tests, Playwright browser suite and production build with Node 24 LTS; the committed browser suite uses a mocked API and does not verify CORS or persistence. Then, on a Docker-capable machine, bring up PostgreSQL/n8n/API, import notification in dry-run mode, run the smoke test (with notification) against PostgreSQL and record actual NBO/CLE/DFU workflow executions; section 4.5 already covers PostgreSQL migrations, API smoke checks, n8n import/publishing and a browser run without Docker. Keep credentials local, do not enable paid/live messaging or production deployment, and never approve human gates for me. Report verified outcomes and remaining gaps rather than claiming the entire package is complete.
